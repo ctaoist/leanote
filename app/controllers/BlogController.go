@@ -209,7 +209,7 @@ func (c Blog) getCates(userBlog info.UserBlog) {
 			if len(parentId) == 0 { // 如果是顶层 notebook
 
 				childIds := notebook.ChildNotebookIds
-				childCates := []map[string]interface{}{}
+				childCates := make([]map[string]interface{}, 0, len(childIds))
 				if len(childIds) > 0 { // 如果有子分类
 					for _, childId := range childIds {
 						if childCount := notebookService.HasBlog(childId.Hex()); childCount > 0 { // 如果 childnotebook 也有 blog

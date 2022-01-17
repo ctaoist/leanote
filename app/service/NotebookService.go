@@ -200,7 +200,7 @@ func (this *NotebookService) UpdateNotebookChilds (notebookId, childNotebookId, 
 	if method == "Add" {
 		notebook.ChildNotebookIds = append(notebook.ChildNotebookIds, bson.ObjectIdHex(childNotebookId))
 	} else if method == "Delete" {
-		var childs []bson.ObjectId
+		childs := make([]bson.ObjectId, 0, len(notebook.ChildNotebookIds))
 		for _, child := range notebook.ChildNotebookIds {
 			if child != bson.ObjectIdHex(childNotebookId) {
 				childs = append(childs, child)

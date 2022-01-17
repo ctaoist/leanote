@@ -183,7 +183,6 @@ func Unzip(srcFilePath string, destDirPath string) (ok bool, msg string) {
 		}
 		// Write data to file
 		rc, err := f.Open()
-		defer rc.Close()
 		if err != nil {
 			fmt.Println("FileName : ", f.Name, " open error: ", err)
 			panic(err)
@@ -200,6 +199,8 @@ func Unzip(srcFilePath string, destDirPath string) (ok bool, msg string) {
 			fmt.Println("archive.zip Unzip io.Copy", err)
 			panic(err)
 		}
+		fw.Close()
+		rc.Close()
 	}
 
 	ok = true
