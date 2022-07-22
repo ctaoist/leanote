@@ -306,13 +306,25 @@ gulp.task('i18n', function() {
 
         // 写入到文件中
         var toFilename = targetFilename + '.' + lang + '.js';
-        fs.writeFile(base + '/js/i18n/' + toFilename, str, function(){});
+        var path = base + '/js/i18n/' + toFilename;
+        fs.writeFile(path, str, fwCallback(path));
     }
 
     function genTinymceLang(lang) {
         var msgs = getAllMsgs(leanoteBase + 'messages/' + lang + '/tinymce_editor.conf');
         var str = 'tinymce.addI18n("' + lang + '",' + JSON.stringify(msgs) + ');';
-        fs.writeFile(base + '/tinymce/langs/' + lang + '.js', str, function(){});
+        var path = base + '/tinymce/langs/' + lang + '.js';
+        fs.writeFile(path, str, fwCallback(path));
+    }
+
+    function fwCallback(file) {
+        return function(e) {
+            if ( e ) {
+                console.warn("[FileWrite]: '" + file + "' write failure", e);
+            } else {
+                console.log("[FileWrite]: '" + file + "' write success");
+            }
+        }
     }
 
     var langs = getAllLangs();

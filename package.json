@@ -13,11 +13,13 @@
     "gulp-concat": "",
     "gulp-replace": "",
     "gulp-inject": "",
-    "gulp-sequence": ""
+    "gulp-sequence": "",
+    "gulp-minify-css": "^1.2.4"
   },
   "author": "life(http://life.leanote.com)",
   "license": "GPL v2",
   "bugs": {
     "url": "https://github.com/leanote/leanote/issues"
-  }
+  },
+  "engines": { "node": "<12" }
 }
