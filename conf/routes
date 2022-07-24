@@ -13,6 +13,8 @@ GET     /index   	                                Index.Index
 GET     /login                                     	Auth.Login
 POST     /doLogin                                   Auth.DoLogin
 GET     /logout                                     Auth.Logout
+POST    /ldap/login                                 LdapAuth.LdapLogin
+GET     /ldap/login                                 LdapAuth.LdapLoginView
 # Get     /demo                                   	Auth.Demo
 
 Get 	 /register									Auth.Register

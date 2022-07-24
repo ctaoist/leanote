@@ -22,7 +22,7 @@
 				<div class="alert alert-danger" id="loginMsg"></div>
 				<input id="from" type="hidden" value="{{.from}}" />
 				<div class="form-group">
-					<label class="control-label">{{msg . "usernameOrEmail"}}</label>
+					<label class="control-label">{{msg . "username"}}</label>
 					<input type="text" class="form-control" id="email" name="email" value="{{.email}}"> 
 				</div>
 				<div class="form-group"> 
@@ -118,7 +118,7 @@ $(function() {
 		$("#loginBtn").html("{{msg . "logining"}}...").addClass("disabled");
 		// hideMsg();
 		
-		$.post("/doLogin", {email: email, pwd: pwd, captcha: $("#captcha").val()}, function(e) {
+		$.post("/ldap/login", {username: email, password: pwd, captcha: $("#captcha").val()}, function(e) {
 			$("#loginBtn").html("{{msg . "login"}}").removeClass("disabled");
 			if(e.Ok) {
 				$("#loginBtn").html("{{msg . "loginSuccess"}}...");
