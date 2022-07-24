@@ -73,7 +73,7 @@ func (c LdapAuth) LdapLogin(username string, password string) revel.Result {
 	err = conn.Bind(userDN, password)
 
 	if err != nil {
-		utils.Logger.Warn("[ldap]: '" + userDN + "'认证失败" + password)
+		utils.Logger.Warn("[ldap]: '" + userDN + "'认证失败")
 
 		return c.RenderJSON(info.Re{Ok: false, Item: sessionService.LoginTimesIsOver(sessionId), Msg: c.Message(msg)})
 	}
