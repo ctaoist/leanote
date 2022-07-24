@@ -7,4 +7,6 @@ services:
     ports:
       - "27017:27017"
     volumes:
+      # 重置数据库
+      # sudo docker exec mongo mongorestore -h localhost -d leanote --dir /tmp/backup/leanote_install_data
       - "./mongodb_backup:/tmp/backup"
