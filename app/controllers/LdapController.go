@@ -15,6 +15,12 @@ type LdapAuth struct {
 }
 
 func (c LdapAuth) LdapLoginView(username, from string) revel.Result {
+	enable := revel.Config.BoolDefault("ldap.enable", false)
+
+	if !enable { // ldap认证功能被禁用
+		return c.Redirect("/login")
+	}
+
 	host, _ := revel.Config.String("ldap.host")
 
 	if host == "" { // 未配置认证地址则返回首页
@@ -37,6 +43,12 @@ func (c LdapAuth) LdapLoginView(username, from string) revel.Result {
 }
 
 func (c LdapAuth) LdapLogin(username string, password string) revel.Result {
+	enable := revel.Config.BoolDefault("ldap.enable", false)
+
+	if !enable { // ldap认证功能被禁用
+		return c.Redirect("/login")
+	}
+
 	host, _ := revel.Config.String("ldap.host")
 
 	sessionId := c.Session.ID()
