@@ -47,7 +47,9 @@
 				<div class="line line-dashed"></div>
 				
 				<!-- <p class="text-muted text-center"><small>{{msg . "hasAcount"}}</small></p> -->
-				
+				{{if .enableLdap }}
+				<a href="/ldap/login" class="btn btn-info btn-block">{{msg . "ldapLoginButton"}}</a>
+				{{end}}
 				{{if .openRegister}}
 				<a href="/register" class="btn btn-default btn-block">{{msg . "register"}}</a>
 				<!-- {{msg . "or"}} -->
