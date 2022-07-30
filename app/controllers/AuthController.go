@@ -51,6 +51,7 @@ func (c Auth) doLogin(email, pwd string) revel.Result {
 	} else {
 		c.SetSession(userInfo)
 		sessionService.ClearLoginTimes(sessionId)
+		keepAliveService.SetKeepAlive(c.Controller, &info.KeepAliveCookie{Username: userInfo.Username})
 		return c.RenderJSON(info.Re{Ok: true})
 	}
 
@@ -72,6 +73,7 @@ func (c Auth) DoLogin(email, pwd string, captcha string) revel.Result {
 		} else {
 			c.SetSession(userInfo)
 			sessionService.ClearLoginTimes(sessionId)
+			keepAliveService.SetKeepAlive(c.Controller, &info.KeepAliveCookie{Username: userInfo.Username})
 			return c.RenderJSON(info.Re{Ok: true})
 		}
 	}
@@ -84,6 +86,7 @@ func (c Auth) Logout() revel.Result {
 	sessionId := c.Session.ID()
 	sessionService.Clear(sessionId)
 	c.ClearSession()
+	keepAliveService.TryRemoveKeepalive(c.BaseController.Controller)
 	return c.Redirect("/login")
 }
 

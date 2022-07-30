@@ -15,6 +15,7 @@ POST     /doLogin                                   Auth.DoLogin
 GET     /logout                                     Auth.Logout
 POST    /ldap/login                                 LdapAuth.LdapLogin
 GET     /ldap/login                                 LdapAuth.LdapLoginView
+POST    /cookie/login                               CookieAuth.DoLogin
 # Get     /demo                                   	Auth.Demo
 
 Get 	 /register									Auth.Register

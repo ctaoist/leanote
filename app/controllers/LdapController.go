@@ -97,6 +97,8 @@ func (c LdapAuth) LdapLogin(username string, password string) revel.Result {
 
 		sessionService.ClearLoginTimes(sessionId)
 
+		keepAliveService.SetKeepAlive(c.BaseController.Controller, &info.KeepAliveCookie{Username: userInfo.Username})
+
 		return c.RenderJSON(info.Re{Ok: true})
 	}
 
@@ -105,6 +107,7 @@ func (c LdapAuth) LdapLogin(username string, password string) revel.Result {
 	userInfo.ThirdUserId = "ldap"
 	userInfo.ThirdUsername = strings.ToLower(username)
 	userInfo.CreatedTime = time.Now()
+	userInfo.Username = username
 	userInfo.UsernameRaw = username
 	userInfo.UserId = bson.NewObjectId()
 
@@ -113,8 +116,12 @@ func (c LdapAuth) LdapLogin(username string, password string) revel.Result {
 
 		sessionService.ClearLoginTimes(sessionId)
 
+		keepAliveService.SetKeepAlive(c.BaseController.Controller, &info.KeepAliveCookie{Username: userInfo.Username})
+
 		return c.RenderJSON(info.Re{Ok: true})
 	}
+
+	keepAliveService.SetKeepAlive(c.BaseController.Controller, &info.KeepAliveCookie{Username: userInfo.Username})
 
 	return c.RenderJSON(info.Re{Ok: false, Item: sessionService.LoginTimesIsOver(sessionId), Msg: c.Message("ldapUserBindFail")})
 }
