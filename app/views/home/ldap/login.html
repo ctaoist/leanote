@@ -35,14 +35,20 @@
 				</div>
 				
 				<div class="clearfix">
+					<label class="pull-left m-t-xs">
+						<input id="keepalive" name="keepalive" type="checkbox"/>
+						{{msg . "session.keepalive"}}
+					</label>
 					<a href="/findPassword" class="pull-right m-t-xs"><small>{{msg . "forgetPassword"}}</small></a>
-					<button id="loginBtn" class="btn btn-success">{{msg . "login"}}</button>
+<!--					<button id="loginBtn" class="btn btn-success">{{msg . "login"}}</button>-->
 				</div>
 				<!--
 				<div class="line line-dashed"></div>
 				
 				<a href="#" id="github" class="btn btn-github btn-block m-b-sm"><i class="fa fa-github pull-left"></i>{{msg . "use"}} Github</a>
 				-->
+
+				<button id="loginBtn" class="btn btn-success btn-block">{{msg . "login"}}</button>
 				
 				<div class="line line-dashed"></div>
 				
@@ -72,6 +78,8 @@
 
 <script src="/libs/jquery/jquery.min.js"></script>
 <script src="/libs/bootstrap/bootstrap.min.js"></script>
+<script src="/libs/fingerprint.min.js"></script>
+<script src="/js/login.js"></script>
 
 <script>
 $(function() {
@@ -120,12 +128,11 @@ $(function() {
 		$("#loginBtn").html("{{msg . "logining"}}...").addClass("disabled");
 		// hideMsg();
 		
-		$.post("/ldap/login", {username: email, password: pwd, captcha: $("#captcha").val()}, function(e) {
+		$.post("/ldap/login", {username: email, password: pwd, captcha: $("#captcha").val(), keepalive: $('#keepalive').is(':checked')}, function(e) {
 			$("#loginBtn").html("{{msg . "login"}}").removeClass("disabled");
 			if(e.Ok) {
 				$("#loginBtn").html("{{msg . "loginSuccess"}}...");
-				var from = $("#from").val() || "{{.noteUrl}}" || "/note";
-				location.href = from;
+				location.href = $("#from").val() || "{{.noteUrl}}" || "/note";
 			} else {
 				if(e.Item && $.trim($("#captchaContainer").text()) == "") {
 					$("#captchaContainer").html($("#tCaptcha").html());
