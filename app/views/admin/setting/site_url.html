@@ -1,5 +1,5 @@
 {{template "admin/top.html" .}}
-<div class="m-b-md"> <h3 class="m-b-none">Site's URL</h3></div>
+<div class="m-b-md"> <h3 class="m-b-none">{{msg . "sitesURL"}}</h3></div>
 
 <div class="row">
 
@@ -8,16 +8,14 @@
         <section class="panel panel-default">
             <div class="panel-body">
                 <div class="form-group">
-                    <label>Site's URL</label>
-                    <input type="text" class="form-control" name="siteUrl" value="{{.str.siteUrl}}" placeholder="http://localhost:9000">
-                    Please note that if the value isn't blank, it will override the "siteUrl" configuration on app.conf.
-                    <br>
-                    Site's URL will be used to upload images, find password, and send email...
+                    <label>{{msg . "sitesURL"}}</label>
+                    <input aria-label="" type="text" class="form-control" name="siteUrl" value="{{.str.siteUrl}}" placeholder="http://localhost:9000">
+                    {{msg . "sitesURLHelp"}}
                 </div>
             </div>
             
             <footer class="panel-footer text-right bg-light lter">
-                <button type="submit" id="submit" class="btn btn-success btn-s-xs">Submit</button>
+                <button type="submit" id="submit" class="btn btn-success btn-s-xs">{{msg . "Submit"}}</button>
             </footer>
         </section>
     </form>
