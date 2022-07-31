@@ -843,6 +843,10 @@ Notebook.deleteNotebook = function(target) {
 	if(!notebookId) {
 		return;
 	}
+
+	if ( !confirm(getMsg('confirmDeleteComment')) ) {
+		return;
+	}
 	
 	ajaxGet("/notebook/deleteNotebook", {notebookId: notebookId}, function(ret) {
 		if(ret.Ok) {

@@ -1298,6 +1298,10 @@ Note.deleteNote = function(target, contextmenuItem, isShared) {
 		return;
 	}
 
+	if ( !confirm(getMsg('Are you sure to delete')) ) {
+		return;
+	}
+
 	// 如果删除的是已选中的, 赶紧设置curNoteId = null
 	if(noteIds.length == 1 && $(target).hasClass("item-active")) {
 		// -1 停止定时器
