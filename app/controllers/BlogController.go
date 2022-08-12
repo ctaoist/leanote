@@ -728,21 +728,19 @@ func getBookSharePassword(id bson.ObjectId) string {
 func getCodeBook(c Blog) (map[string]bool, bool) {
 	codebook := map[string]bool{}
 
-	caches := c.Session.Serialize()
+	caches := c.Session
 
 	if text, ok := caches["codebook"]; ok {
-		e := json.Unmarshal([]byte(text), &codebook)
+		e := json.Unmarshal([]byte(text.(string)), &codebook)
 
 		if e != nil {
 			c.Log.Warn("codebook unmarshal " + e.Error())
+		} else {
+			c.Log.Debug("Get codebook '" + text.(string) + "' from session")
 		}
-
-		c.Log.Info("Get codebook '" + text + "' from session")
 
 		return codebook, false
 	}
-
-	c.Log.Info(fmt.Sprintf("%+v", caches))
 
 	return codebook, true
 }
@@ -750,15 +748,17 @@ func getCodeBook(c Blog) (map[string]bool, bool) {
 func savePassToCodeBook(c Blog, password string) {
 	codebook := map[string]bool{}
 
-	caches := c.Session.Serialize()
+	caches := c.Session
 
 	cacheKey := "codebook"
 
 	if text, ok := caches[cacheKey]; ok {
-		e := json.Unmarshal([]byte(text), &codebook)
+		e := json.Unmarshal([]byte(text.(string)), &codebook)
 
 		if e != nil {
 			c.Log.Warn("codebook unmarshal " + e.Error())
+		} else {
+			c.Log.Debug("get codebook text: " + text.(string))
 		}
 	}
 
@@ -771,13 +771,14 @@ func savePassToCodeBook(c Blog, password string) {
 	} else {
 		caches[cacheKey] = string(bytes)
 
-		c.Log.Info(fmt.Sprintf("%+v", caches) + " <- " + string(bytes))
+		c.Log.Debug("set " + cacheKey + ": " + string(bytes))
 	}
 }
 
 func tryUnlock(c Blog, sharePwd string) bool {
 	password := c.Params.Values.Get("password")
 
+	// 解锁密码
 	c.Log.Debug("get unlock password '" + password + "' from request ")
 
 	if password == "" {
