@@ -144,7 +144,7 @@ gulp.task('concatMarkdownJs', function() {
 gulp.task('concatMarkdownJsV2', function() {
     var jss = [
         'js/require.js',
-        'md/main-v2.min.js',
+        'md/main-v2.js',
     ];
 
     for(var i in jss) {
