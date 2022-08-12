@@ -7,25 +7,25 @@ type KeepAliveCookie struct {
 	/**
 	 * 创建时间
 	 */
-	CreateTime time.Time `CreateTime:"create_time"`
+	CreateTime time.Time `json:"create_time" bson:"create_time"`
 	/**
 	 * 过期时间
 	 */
-	ExpireTime time.Time `ExpireTime:"expire_time"`
+	ExpireTime time.Time `json:"expire_time" bson:"expire_time"`
 	/**
 	 * 登录IP地址
 	 */
-	ClientIP string `ClientIP:"client_ip"`
+	ClientIP string `json:"client_ip" bson:"client_ip"`
 	/**
 	 * Token值
 	 */
-	Token string `Token:"token"`
+	Token string `json:"token" bson:"token"`
 	/**
 	 * 绑定的用户名
 	 */
-	Username string `Username:"username"`
+	Username string `json:"username" bson:"username"`
 	/**
 	 * 客户端ID
 	 */
-	ClientID string `ClientID:"client_id"`
+	ClientID string `json:"client_id" bson:"client_id"`
 }
