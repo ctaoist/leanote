@@ -652,38 +652,86 @@ function hideDialogRemote(timeout) {
 }
 //---------------
 // notify
-// 没用
-$(function() {
-    if($.pnotify) {
-        $.pnotify.defaults.delay = 1000;
-    }
-})
+(function (window) {
+    var MessageBox = {
+        count: 0
+    };
 
-function notifyInfo(text) {
-    $.pnotify({
-        title: '通知',
-        text: text,
-        type: 'info',
-        styling: 'bootstrap'
-    });
-}
-function notifyError(text) {
-    $.pnotify.defaults.delay = 2000
-    $.pnotify({
-        title: '通知',
-        text: text,
-        type: 'error',
-        styling: 'bootstrap'
-    });
-}
-function notifySuccess(text) {
-    $.pnotify({
-        title: '通知',
-        text: text,
-        type: 'success',
-        styling: 'bootstrap'
-    });
-}
+    function show(view, func) {
+        return view.animate({'margin-right': '0', 'opacity': 1}, 800, 'linear', func);
+    }
+
+    function hide(view, func) {
+        return view.animate({'margin-right': '-100%', 'opacity': 0}, 800, 'linear', func);
+    }
+
+    function remove(view) {
+        return hide(view, function () {
+            view.remove();
+        });
+    }
+
+    /**
+     * 通知消息
+     *
+     * @param message     消息内容
+     * @param duration    显示时间
+     */
+    function notify(message, duration) {
+        var container = $('#message-container');
+
+        if ( container.length === 0 ) {
+            container = $('<div id="message-container" class="lea-messages-view"/>').appendTo(document.body);
+        }
+
+        var pane = $('<div class="lea-message"></div>');
+
+        let data;
+
+        if ( typeof message === 'string' ) {
+            data = {type: 'info', text: message}
+        } else {
+            data = message;
+        }
+
+        pane.attr('id', 'message-' + MessageBox.count++);
+        pane.addClass((data.type || 'info'));
+
+        var body = $('<div class="lea-message-body"></div>').text(data.text);
+
+        pane.append(body);
+
+        var close = $('<a tabindex="0" class="lea-message-close"><svg viewBox="64 64 896 896" focusable="false" class="" data-icon="close" width="1em" height="1em" fill="currentColor" aria-hidden="true"> <path d="M563.8 512l262.5-312.9c4.4-5.2.7-13.1-6.1-13.1h-79.8c-4.7 0-9.2 2.1-12.3 5.7L511.6 449.8 295.1 191.7c-3-3.6-7.5-5.7-12.3-5.7H203c-6.8 0-10.5 7.9-6.1 13.1L459.4 512 196.9 824.9A7.95 7.95 0 00203 838h79.8c4.7 0 9.2-2.1 12.3-5.7l216.5-258.1 216.5 258.1c3 3.6 7.5 5.7 12.3 5.7h79.8c6.8 0 10.5-7.9 6.1-13.1L563.8 512z"></path> </svg></a>');
+
+        pane.append(close);
+
+        container.append(pane);
+
+        show(pane, function () {
+            setTimeout(function () {
+                return remove(pane);
+            }, duration || 3000)
+        })
+    }
+
+    $(document).on('click', '.lea-message-close', function () {
+        remove($(this).closest('.lea-message'));
+    })
+
+    window.notifyInfo = function (text, timeout) {
+        return notify({type: 'info', text: text}, timeout);
+    }
+    window.notifyError = function (text, timeout) {
+        return notify({type: 'danger', text: text}, timeout);
+    }
+    window.notifySuccess = function (text, timeout) {
+        return notify({type: 'success', text: text}, timeout);
+    }
+    window.notifyWarning = function (text, timeout) {
+        return notify({type: 'warning', text: text}, timeout);
+    }
+    window.notify = notify;
+})(window);
 
 // 对Date的扩展，将 Date 转化为指定格式的String   
 //月(M)、日(d)、小时(h)、分(m)、秒(s)、季度(q) 可以用 1-2 个占位符，   

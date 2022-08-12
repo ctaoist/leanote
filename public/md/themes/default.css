@@ -658,3 +658,70 @@ pre.prettyprint code {
     background-color: #f2dede;
     border-color: #ebccd1;
 }
+
+.lea-messages-view {
+  margin-top: 60px;
+  flex-direction: column;
+  align-items: flex-end;
+  align-content: flex-end;
+  justify-content: flex-start;
+  display: flex;
+  min-width: 304px;
+  position: absolute;
+  z-index: 105;
+  box-sizing: border-box;
+  cursor: default;
+  overflow: hidden;
+  padding: 8px;
+  opacity: 1;
+  transition: all .4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  right: 0;
+}
+.lea-messages-view .lea-message {
+  transition: .6s linear all;
+  box-sizing: border-box;
+  margin-right: 0;
+  max-width: 80vw;
+}
+.lea-messages-view .lea-message {
+  display: inline-block;
+  padding: 10px 40px 10px 16px;
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 3px 6px -4px rgb(0 0 0 / 12%), 0 6px 16px 0 rgb(0 0 0 / 8%), 0 9px 28px 8px rgb(0 0 0 / 5%);
+  pointer-events: all;
+  position: relative;
+  font-size: 14px;
+  color: rgba(0,0,0,.85);
+  font-variant: tabular-nums;
+  line-height: 1.5715;
+  margin-right: -100%;
+  margin-bottom: 16px;
+}
+.lea-messages-view .lea-message .lea-message-close {
+    position: absolute;
+    right: 14px;
+    top: 12px;
+}
+
+.lea-messages-view .lea-message.info {
+    color: #31708f;
+    background-color: #d9edf7;
+    border-color: #bce8f1;
+}
+
+.lea-messages-view .lea-message.success {
+    color: #3c763d;
+    background-color: #dff0d8;
+    border-color: #d6e9c6;
+}
+.lea-messages-view .lea-message.warning {
+    color: #8a6d3b;
+    background-color: #fcf8e3;
+    border-color: #faebcc;
+}
+.lea-messages-view .lea-message.danger {
+    color: #a94442;
+    background-color: #f2dede;
+    border-color: #ebccd1;
+}
