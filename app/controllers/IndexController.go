@@ -26,12 +26,13 @@ func (c Index) Index() revel.Result {
 		return c.Redirect("/note/" + c.GetUserId())
 	}
 
-	c.SetUserInfo()
-	c.ViewArgs["title"] = "leanote"
-	c.ViewArgs["openRegister"] = configService.GlobalStringConfigs["openRegister"]
-	c.SetLocale()
-
-	return c.RenderTemplate("home/index.html")
+	return c.Redirect("/login")
+	//c.SetUserInfo()
+	//c.ViewArgs["title"] = "leanote"
+	//c.ViewArgs["openRegister"] = configService.GlobalStringConfigs["openRegister"]
+	//c.SetLocale()
+	//
+	//return c.RenderTemplate("home/index.html")
 }
 
 // 建议
