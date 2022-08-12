@@ -1351,6 +1351,12 @@ Note.listNoteShareUserInfo = function(target) {
 	showDialogRemote("/share/listNoteShareUserInfo", {noteId: noteId});
 };
 
+Note.setSecret = function (target) {
+	var noteId = $(target).attr("noteId");
+
+	showDialogRemote("/share/secret", {typeName: 'note', dataId: noteId});
+}
+
 // 共享笔记
 Note.shareNote = function(target) {
 	var title = $(target).find(".item-title").text();
@@ -1893,6 +1899,8 @@ Note.initContextmenu = function() {
 			{ type: "splitLine" },
 			{ text: getMsg("publicAsBlog"), alias: 'set2Blog', faIcon: "fa-bold", action: Note.setNote2Blog },
 			{ text: getMsg("cancelPublic"), alias: 'unset2Blog', faIcon: "fa-undo", action: Note.unsetNote2Blog },
+			// 访问密码
+			{ text: getMsg("accessSecret"), alias: 'setSecret', icon: "", faIcon: "fa-lock", action: Note.setSecret},
 			{ text: getMsg("setBlogTop"), alias: 'setBlogTop', faIcon: "fa-arrow-up", action: Note.setBlogTop },
 			{ text: getMsg("cancelBlogTop"), alias: 'cancelBlogTop', faIcon: "fa-minus", action: Note.unsetBlogTop },
 			{ type: "splitLine" },

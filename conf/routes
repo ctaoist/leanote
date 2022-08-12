@@ -26,6 +26,9 @@ GET 	/findPassword								Auth.FindPassword
 POST 	/doFindPassword								Auth.DoFindPassword
 POST	/findPasswordUpdate							Auth.FindPasswordUpdate
 
+GET     /share/secret                               Share.ShowSecret
+POST    /share/secret                               Share.UpdateSecret
+
 #####
 # 这么多列表, 只是为了最后一句pjax
 # note
@@ -75,6 +78,7 @@ GET		/blog/archives	Blog.Archives
 GET		/blog/post/:noteId			Blog.Post
 GET		/blog/post/:userIdOrEmail/:noteId			Blog.Post
 GET		/blog/view/:noteId			Blog.Post
+POST	/blog/post/:userIdOrEmail/:noteId			Blog.Post
 
 GET		/blog/single/:userIdOrEmail/:singleId       Blog.Single
 GET		/blog/single/:singleId		                Blog.Single

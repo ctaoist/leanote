@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"encoding/json"
+
 	// "io/ioutil"
 	// "os"
 	"strings"
@@ -677,6 +679,156 @@ func (c Blog) Index(userIdOrEmail string) (re revel.Result) {
 	return c.render("index.html", userBlog.ThemePath)
 }
 
+// @title getNoteSharePassword
+// @description   获取笔记分享密码
+// @param	item info.BlogItem "博客信息"
+// @return sharePwd string "保护密码"
+func getNoteSharePassword(item info.BlogItem) string {
+	sharePwd := item.SharePwd
+
+	if sharePwd != "" {
+		return sharePwd
+	}
+
+	bookId := item.NotebookId
+
+	if !bookId.Valid() {
+		return sharePwd
+	}
+
+	return getBookSharePassword(bookId)
+}
+
+// @title getNoteSharePassword
+// @description   递归获取笔记本分享密码
+// @param	id bson.ObjectId "笔记本密码"
+// @return sharePwd string "保护密码"
+func getBookSharePassword(id bson.ObjectId) string {
+	book := notebookService.GetNotebookById(id.Hex())
+
+	if !book.NotebookId.Valid() {
+		return ""
+	}
+
+	sharePwd := book.SharePwd
+
+	if sharePwd != "" {
+		return sharePwd
+	}
+
+	parent := book.ParentNotebookId
+
+	if parent.Valid() {
+		return getBookSharePassword(parent)
+	}
+
+	return ""
+}
+
+func getCodeBook(c Blog) (map[string]bool, bool) {
+	codebook := map[string]bool{}
+
+	caches := c.Session.Serialize()
+
+	if text, ok := caches["codebook"]; ok {
+		e := json.Unmarshal([]byte(text), &codebook)
+
+		if e != nil {
+			c.Log.Warn("codebook unmarshal " + e.Error())
+		}
+
+		c.Log.Info("Get codebook '" + text + "' from session")
+
+		return codebook, false
+	}
+
+	c.Log.Info(fmt.Sprintf("%+v", caches))
+
+	return codebook, true
+}
+
+func savePassToCodeBook(c Blog, password string) {
+	codebook := map[string]bool{}
+
+	caches := c.Session.Serialize()
+
+	cacheKey := "codebook"
+
+	if text, ok := caches[cacheKey]; ok {
+		e := json.Unmarshal([]byte(text), &codebook)
+
+		if e != nil {
+			c.Log.Warn("codebook unmarshal " + e.Error())
+		}
+	}
+
+	codebook[password] = true
+
+	bytes, e := json.Marshal(codebook)
+
+	if e != nil {
+		c.Log.Warn("codebook marshal: " + e.Error())
+	} else {
+		caches[cacheKey] = string(bytes)
+
+		c.Log.Info(fmt.Sprintf("%+v", caches) + " <- " + string(bytes))
+	}
+}
+
+func tryUnlock(c Blog, sharePwd string) bool {
+	password := c.Params.Values.Get("password")
+
+	c.Log.Debug("get unlock password '" + password + "' from request ")
+
+	if password == "" {
+		c.ViewArgs["tips"] = c.Message("blogProtectTips")
+		c.ViewArgs["tipsType"] = "warning"
+		return true
+	} else if password == sharePwd {
+		// 密码验证成功，保存到会话中
+		savePassToCodeBook(c, sharePwd)
+
+		return false
+	} else {
+		c.ViewArgs["tips"] = c.Message("wrongPassword")
+		c.ViewArgs["tipsType"] = "danger"
+	}
+
+	return true
+}
+
+func isNeedPassword(c Blog, item info.BlogItem) bool {
+	sharePwd := getNoteSharePassword(item)
+
+	if sharePwd == "" {
+		return false
+	}
+
+	userId := c.GetUserId()
+
+	if userId == item.UserId.Hex() { // 创建者，不需要密码
+		c.Log.Debug(userId + " = " + item.UserId.Hex() + "is owner")
+		return false
+	}
+
+	c.Log.Debug("Need password '" + sharePwd + "' to unlock")
+
+	codebook, isNew := getCodeBook(c)
+
+	if isNew {
+		return tryUnlock(c, sharePwd)
+	}
+
+	if _, ok := codebook[sharePwd]; ok {
+		// 会话中保存验证成功的密码
+		c.Log.Debug("unlock by session code book")
+
+		return false
+	}
+
+	return tryUnlock(c, sharePwd)
+}
+
 func (c Blog) Post(userIdOrEmail, noteId string) (re revel.Result) {
 	// 自定义域名
 	hasDomain, userBlog := c.domain()
@@ -727,6 +879,12 @@ func (c Blog) Post(userIdOrEmail, noteId string) (re revel.Result) {
 	if nextPost.NoteId != "" {
 		c.ViewArgs["nextPost"] = nextPost
 	}
+
+	if isNeedPassword(c, blogInfo) {
+		// 需要密码
+		return c.render("post_401.html", userBlog.ThemePath)
+	}
+
 	return c.render("post.html", userBlog.ThemePath)
 }
 
@@ -809,7 +967,7 @@ func (c Blog) Search(userIdOrEmail, keywords string) (re revel.Result) {
 	return c.render("search.html", userBlog.ThemePath)
 }
 
-//----------------
+// ----------------
 // RSS 订阅
 func (c Blog) RSS(userIdOrEmail string) (re revel.Result) {
 	hasDomain, userBlog := c.domain() // 自定义域名
