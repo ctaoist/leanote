@@ -2679,8 +2679,8 @@ $(function() {
 		Note.curChangedSaveIt(true);
 	});
 
-	// blog
-	Note.$itemList.on("click", ".item-blog", function(e) {
+	// blog, blogtop
+	Note.$itemList.on("click", ".item-blog, .item-blogtop", function(e) {
 		e.preventDefault();
 		// 这导致其它dropdown不能隐藏
 		e.stopPropagation();
