@@ -27,6 +27,7 @@ var Blogs *mgo.Collection
 var Users *mgo.Collection
 var Groups *mgo.Collection
 var GroupUsers *mgo.Collection
+var KeepAliveTokens *mgo.Collection
 
 var Tags *mgo.Collection
 var NoteTags *mgo.Collection
@@ -171,6 +172,8 @@ func Init(url, dbname string) {
 
 	// session
 	Sessions = Session.DB(dbname).C("sessions")
+	// 记住密码表
+	KeepAliveTokens = Session.DB(dbname).C("keepalive_cookies")
 }
 
 func close() {
@@ -225,7 +228,6 @@ func UpdateByIdAndUserIdMap2(collection *mgo.Collection, id, userId bson.ObjectI
 	return UpdateByIdAndUserId2(collection, id, userId, bson.M{"$set": v})
 }
 
-//
 func UpdateByQField(collection *mgo.Collection, q interface{}, field string, value interface{}) bool {
 	_, err := collection.UpdateAll(q, bson.M{"$set": bson.M{field: value}})
 	return Err(err)

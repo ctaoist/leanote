@@ -9,9 +9,9 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"runtime"
 	"strings"
 	"time"
-	"runtime"
 	//	"github.com/leanote/leanote/app/types"
 	//	"io/ioutil"
 	"fmt"
@@ -188,13 +188,23 @@ func (c Note) UpdateNoteOrContent(noteOrContent info.NoteOrContent) revel.Result
 			NoteId:     bson.ObjectIdHex(noteOrContent.NoteId),
 			NotebookId: bson.ObjectIdHex(noteOrContent.NotebookId),
 			Title:      noteOrContent.Title,
-			Src: noteOrContent.Src, // 来源
+			Src:        noteOrContent.Src, // 来源
 			Tags:       strings.Split(noteOrContent.Tags, ","),
 			Desc:       noteOrContent.Desc,
 			ImgSrc:     noteOrContent.ImgSrc,
 			IsBlog:     noteOrContent.IsBlog,
 			IsMarkdown: noteOrContent.IsMarkdown,
 		}
+
+		if !note.IsBlog {
+			// 公开博客继承于笔记本
+			noteBook := notebookService.GetNotebookById(noteOrContent.NotebookId)
+
+			if noteBook.IsBlog {
+				note.IsBlog = true
+			}
+		}
+
 		noteContent := info.NoteContent{NoteId: note.NoteId,
 			UserId:   userId,
 			IsBlog:   note.IsBlog,
@@ -240,7 +250,7 @@ func (c Note) UpdateNoteOrContent(noteOrContent info.NoteOrContent) revel.Result
 	if c.Has("Content") {
 		//		noteService.UpdateNoteContent(noteOrContent.UserId, c.GetUserId(),
 		//			noteOrContent.NoteId, noteOrContent.Content, noteOrContent.Abstract)
-		// contentOk, contentMsg, afterContentUsn = 
+		// contentOk, contentMsg, afterContentUsn =
 		noteService.UpdateNoteContent(c.GetUserId(),
 			noteOrContent.NoteId, noteOrContent.Content, noteOrContent.Abstract,
 			needUpdateNote, -1, time.Now())
@@ -310,7 +320,7 @@ func (c Note) CopySharedNote(noteIds []string, notebookId, fromUserId string) re
 	return c.RenderJSON(re)
 }
 
-//------------
+// ------------
 // search
 // 通过title搜索
 func (c Note) SearchNote(key string) revel.Result {

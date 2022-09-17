@@ -1,11 +1,11 @@
 {{template "admin/top.html" .}}
-<div class="m-b-md"> <h3 class="m-b-none">Users</h3></div>
+<div class="m-b-md"> <h3 class="m-b-none">{{msg . "Users"}}</h3></div>
 
 <section class="panel panel-default">
 	<div class="row wrapper">
 		<div class="col-sm-5 m-b-xs">
 			<button class="btn btn-sm btn-default bulk-email">
-				Send Email
+				{{msg . "sendEmail"}}
 			</button>
 		</div>
 		<div class="col-sm-4 m-b-xs">
@@ -13,9 +13,9 @@
 		</div>
 		<div class="col-sm-3">
 			<div class="input-group search-group">
-				<input type="text" class="input-sm form-control" placeholder="Username or Email" id="keywords" value="{{.keywords}}" />
+				<input aria-label="Username" type="text" class="input-sm form-control" placeholder="{{msg . "usernameOrEmail"}}" id="keywords" value="{{.keywords}}" />
 				<span class="input-group-btn">
-					<button class="btn btn-sm btn-default" type="button" data-url="/adminUser/index">Search</button>
+					<button class="btn btn-sm btn-default" type="button" data-url="/adminUser/index">{{msg . "search"}}</button>
 				</span>
 			</div>
 		</div>
@@ -25,7 +25,7 @@
 			<thead>
 				<tr>
 					<th width="20">
-						<input type="checkbox">
+						<input aria-label="checkbox" type="checkbox">
 					</th>
 					{{$url := urlConcat "/adminUser/index" "keywords" .keywords}}
 					<th 
@@ -41,7 +41,7 @@
 					<th
 					{{sorterTh $url "username" .sorter}}
 					>
-						Username
+						{{msg . "Username"}}
 						<span class="th-sort">
 							<i class="fa fa-sort-down"></i>
 							<i class="fa fa-sort-up"></i>
@@ -51,7 +51,7 @@
 					<th
 					{{sorterTh $url "verified" .sorter}}
 					>
-						Verified
+						{{msg . "verified"}}
 						<span class="th-sort">
 							<i class="fa fa-sort-down"></i>
 							<i class="fa fa-sort-up"></i>
@@ -61,7 +61,7 @@
 					<th
 					{{sorterTh $url "createdTime" .sorter}}
 					>
-						Register Date
+						{{msg . "registerDate"}}
 						<span class="th-sort">
 							<i class="fa fa-sort-down"></i>
 							<i class="fa fa-sort-up"></i>
@@ -103,7 +103,7 @@
 		<div class="row">
 			<div class="col-sm-4 hidden-xs">
 				<button class="btn btn-sm btn-default bulk-email">
-					Send Email
+					{{msg . "sendEmail"}}
 				</button>
 			</div>
 			
@@ -137,7 +137,7 @@ $(function() {
 	// reset password
 	$(".reset-pwd").click(function() {
 		var id = $(this).data("id");
-		openDialog({width: 500,  url: "/adminUser/resetPwd?userId=" + id, title: "Reset Password"});
+		openDialog({width: 500,  url: "/adminUser/resetPwd?userId=" + id, title: '{{msg . "resetPassword"}}'});
 	});
 });
 </script>

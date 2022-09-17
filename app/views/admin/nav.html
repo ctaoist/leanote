@@ -8,7 +8,7 @@
 					</b>
 				</i>
 				<span>
-					Dashboard
+					{{msg . "Dashboard"}}
 				</span>
 			</a>
 		</li>
@@ -26,7 +26,7 @@
 					</i>
 				</span>
 				<span>
-					User 
+					{{msg . "UserAdmin"}}
 				</span>
 			</a>
 			<!-- 导航列表 -->
@@ -34,14 +34,14 @@
 				<li>
 					<a href="/adminUser/index">
 						<span>
-							Users
+							{{msg . "Users"}}
 						</span>
 					</a>
 				</li>
 				<li>
 					<a href="/adminUser/add">
 						<span>
-							Add User
+							{{msg . "Add User"}}
 						</span>
 					</a>
 				</li>
@@ -55,7 +55,7 @@
 					</b>
 				</i>
 				<span>
-					Blog
+					{{msg . "blog"}}
 				</span>
 			</a>
 		</li>
@@ -72,42 +72,42 @@
 					</i>
 				</span>
 				<span>
-					Email
+					{{msg . "email"}}
 				</span>
 			</a>
 			<ul class="nav lt">
 				<li>
 					<a href="/admin/t?t=email/set">
 						<span>
-							Configuration
+							{{msg . "configuration"}}
 						</span>
 					</a>
 				</li>
 				<li>
 					<a href="/admin/t?t=email/template">
 						<span>
-							Template
+							{{msg . "emailTemplate"}}
 						</span>
 					</a>
 				</li>
 				<li>
 					<a href="/admin/t?t=email/sendToUsers">
 						<span>
-							Send Email to Users
+							{{msg . "sendEmailToUsers"}}
 						</span>
 					</a>
 				</li>
 				<li>
 					<a href="/admin/t?t=email/send">
 						<span>
-							Send Email
+							{{msg . "sendEmail"}}
 						</span>
 					</a>
 				</li>
 				<li>
 					<a href="/adminEmail/list">
 						<span>
-							Email Logs
+							{{msg . "emailLogs"}}
 						</span>
 					</a>
 				</li>
@@ -127,7 +127,7 @@
 					</i>
 				</span>
 				<span>
-					Configuration
+					{{msg . "configuration"}}
 				</span>
 			</a>
 			<ul class="nav lt">
@@ -135,7 +135,7 @@
 				<li>
 					<a href="/admin/t?t=setting/site_url">
 						<span>
-							Site's URL
+							{{msg . "sitesURL"}}
 						</span>
 					</a>
 				</li>
@@ -143,7 +143,7 @@
 				<li>
 					<a href="/admin/t?t=setting/home_page">
 						<span>
-							Home Page
+							{{msg . "homePage"}}
 						</span>
 					</a>
 				</li>
@@ -151,7 +151,7 @@
 				<li>
 					<a href="/admin/t?t=setting/demo">
 						<span>
-							Demo User
+							{{msg . "demoUser"}}
 						</span>
 					</a>
 				</li>
@@ -159,7 +159,7 @@
 				<li>
 					<a href="/admin/t?t=setting/open_register">
 						<span>
-							Open Register
+							{{msg . "openRegister"}}
 						</span>
 					</a>
 				</li>
@@ -167,7 +167,7 @@
 				<li>
 					<a href="/admin/t?t=setting/share_note">
 						<span>
-							Register Share Note
+							{{msg . "Register Share Note"}}
 						</span>
 					</a>
 				</li>
@@ -175,7 +175,7 @@
 				<li>
 					<a href="/admin/t?t=setting/upload">
 						<span>
-							Upload File Setting
+							{{msg . "uploadFileSettings"}}
 						</span>
 					</a>
 				</li>
@@ -183,7 +183,7 @@
 				<li>
 					<a href="/admin/t?t=setting/export_pdf">
 						<span>
-							Export PDF
+							{{msg . "exportPdf"}}
 						</span>
 					</a>
 				</li>
@@ -205,21 +205,21 @@
 				</span>
 				
 				<span>
-					Data
+					{{msg . "dataAdmin"}}
 				</span>
 			</a>
 			<ul class="nav lt">
 				<li>
 					<a href="/admin/t?t=data/configuration">
 						<span>
-							Mongodb Tool Configuration
+							{{msg . "mongodbToolConfiguration"}}
 						</span>
 					</a>
 				</li>
 				<li>
 					<a href="/adminData/index">
 						<span>
-							Backup & Restore
+							{{msg . "backupAndRestore"}}
 						</span>
 					</a>
 				</li>

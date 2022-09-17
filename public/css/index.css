@@ -294,7 +294,7 @@ section {
 #loginContainer {
   position: relative;
 }
-input,
+input:not([type=checkbox]),
 .form-control {
   border-radius: 2px !important;
   border-color: #d9d9d9;

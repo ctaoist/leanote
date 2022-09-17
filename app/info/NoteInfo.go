@@ -15,11 +15,13 @@ type Note struct {
 	NotebookId    bson.ObjectId `bson:"NotebookId"`
 	Title         string        `Title` // 标题
 	Desc          string        `Desc`  // 描述, 非html
+	// 分享密码
+	SharePwd string `json:"share_pwd" bson:"share_pwd"`
 
 	Src string `Src,omitempty` // 来源, 2016/4/22
 
-	ImgSrc string   `ImgSrc` // 图片, 第一张缩略图地址
-	Tags   []string `Tags,omitempty`
+	ImgSrc string              `ImgSrc` // 图片, 第一张缩略图地址
+	Tags   []string            `Tags,omitempty`
 	Cates  []map[string]string `Cates,omitempty` // 笔记的分类
 
 	IsTrash bool `IsTrash` // 是否是trash, 默认是false

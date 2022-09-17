@@ -14,7 +14,7 @@ type Auth struct {
 	BaseController
 }
 
-//--------
+// --------
 // 登录
 func (c Auth) Login(email, from string) revel.Result {
 	c.ViewArgs["title"] = c.Message("login")
@@ -22,6 +22,8 @@ func (c Auth) Login(email, from string) revel.Result {
 	c.ViewArgs["email"] = email
 	c.ViewArgs["from"] = from
 	c.ViewArgs["openRegister"] = configService.IsOpenRegister()
+	//
+	c.ViewArgs["enableLdap"] = revel.Config.BoolDefault("ldap.enable", false)
 
 	sessionId := c.Session.ID()
 	if sessionService.LoginTimesIsOver(sessionId) {
@@ -49,6 +51,7 @@ func (c Auth) doLogin(email, pwd string) revel.Result {
 	} else {
 		c.SetSession(userInfo)
 		sessionService.ClearLoginTimes(sessionId)
+		keepAliveService.SetKeepAlive(c.Controller, &info.KeepAliveCookie{Username: userInfo.Username})
 		return c.RenderJSON(info.Re{Ok: true})
 	}
 
@@ -70,6 +73,7 @@ func (c Auth) DoLogin(email, pwd string, captcha string) revel.Result {
 		} else {
 			c.SetSession(userInfo)
 			sessionService.ClearLoginTimes(sessionId)
+			keepAliveService.SetKeepAlive(c.Controller, &info.KeepAliveCookie{Username: userInfo.Username})
 			return c.RenderJSON(info.Re{Ok: true})
 		}
 	}
@@ -82,6 +86,7 @@ func (c Auth) Logout() revel.Result {
 	sessionId := c.Session.ID()
 	sessionService.Clear(sessionId)
 	c.ClearSession()
+	keepAliveService.TryRemoveKeepalive(c.BaseController.Controller)
 	return c.Redirect("/login")
 }
 
@@ -100,7 +105,7 @@ func (c Auth) Demo() revel.Result {
 	// }
 }
 
-//--------
+// --------
 // 注册
 func (c Auth) Register(from, iu string) revel.Result {
 	if !configService.IsOpenRegister() {
@@ -141,7 +146,7 @@ func (c Auth) DoRegister(email, pwd, iu string) revel.Result {
 	return c.RenderRe(re)
 }
 
-//--------
+// --------
 // 找回密码
 func (c Auth) FindPassword() revel.Result {
 	c.SetLocale()

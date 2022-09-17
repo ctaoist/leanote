@@ -1,7 +1,10 @@
 package controllers
 
 import (
+	"github.com/leanote/leanote/app/db"
 	"github.com/revel/revel"
+	"gopkg.in/mgo.v2/bson"
+
 	//	"encoding/json"
 	//	"gopkg.in/mgo.v2/bson"
 	"github.com/leanote/leanote/app/info"
@@ -77,6 +80,120 @@ func (c Share) GetShareNoteContent(noteId, sharedUserId string) revel.Result {
 	return c.RenderJSON(noteContent)
 }
 
+func ShowBookSecretText(c Share, bookId string) revel.Result {
+	book := notebookService.GetNotebook(bookId, c.GetUserId())
+
+	if !book.NotebookId.Valid() {
+		return c.RenderTemplate("errors/404.html")
+	}
+
+	c.Log.Info("Show book '" + book.NotebookId.String() + "' share password '" + book.SharePwd + "'")
+
+	c.ViewArgs["isNote"] = false
+	c.ViewArgs["title"] = book.Title
+	c.ViewArgs["noteOrNotebookId"] = book.NotebookId.Hex()
+	c.ViewArgs["sharePwd"] = book.SharePwd
+	c.ViewArgs["typeName"] = "book"
+	c.ViewArgs["shareTip"] = c.Message("protectionBookHelp")
+
+	return c.RenderTemplate("share/secret.html")
+}
+
+func ShowNoteSecretText(c Share, noteId string) revel.Result {
+	note := noteService.GetNote(noteId, c.GetUserId())
+
+	if !note.NoteId.Valid() {
+		return c.RenderTemplate("errors/404.html")
+	}
+
+	c.Log.Info("Show note '" + note.NoteId.String() + "' share password '" + note.SharePwd + "'")
+
+	c.ViewArgs["isNote"] = true
+	c.ViewArgs["title"] = note.Title
+	c.ViewArgs["noteOrNotebookId"] = note.NoteId.Hex()
+	c.ViewArgs["sharePwd"] = note.SharePwd
+	c.ViewArgs["typeName"] = "note"
+	c.ViewArgs["shareTip"] = c.Message("protectionNoteHelp")
+
+	return c.RenderTemplate("share/secret.html")
+}
+
+func (c Share) ShowSecret(dataId string, typeName string) revel.Result {
+	if !c.HasLogined() {
+		return c.Redirect("/login")
+	}
+
+	if typeName == "book" {
+		return ShowBookSecretText(c, dataId)
+	} else {
+		return ShowNoteSecretText(c, dataId)
+	}
+}
+
+func UpdateBookSecret(c Share, bookId string, sharePwd string) revel.Result {
+	book := notebookService.GetNotebook(bookId, c.GetUserId())
+
+	if !book.NotebookId.Valid() {
+		return c.RenderJSON(info.Re{Ok: false, Msg: "Not Found", MsgType: "danger"})
+	}
+
+	if sharePwd == book.SharePwd {
+		return c.RenderJSON(info.Re{Ok: false, Msg: c.Message("The protection password has not changed"), MsgType: "warning"})
+	}
+
+	res := db.Update(db.Notebooks, bson.M{
+		"_id": book.NotebookId,
+	}, bson.M{
+		"$set": bson.M{"share_pwd": sharePwd},
+	})
+
+	c.Log.Debug("Update book '" + book.NotebookId.Hex() + "' share password '" + sharePwd + "'")
+
+	if sharePwd == "" {
+		return c.RenderJSON(info.Re{Ok: res, Msg: c.Message("Password_protection_removed"), MsgType: "warning"})
+	} else {
+		return c.RenderJSON(info.Re{Ok: res, Msg: c.Message("The protection password has been changed")})
+	}
+}
+
+func UpdateNoteSecret(c Share, noteId string, sharePwd string) revel.Result {
+	note := noteService.GetNote(noteId, c.GetUserId())
+
+	if !note.NoteId.Valid() {
+		return c.RenderJSON(info.Re{Ok: false, Msg: "Not Found", MsgType: "danger"})
+	}
+
+	if sharePwd == note.SharePwd {
+		return c.RenderJSON(info.Re{Ok: true, Msg: c.Message("The protection password has not changed"), MsgType: "warning"})
+	}
+
+	res := db.Update(db.Notes, bson.M{
+		"_id": note.NoteId,
+	}, bson.M{
+		"$set": bson.M{"share_pwd": sharePwd},
+	})
+
+	c.Log.Debug("Update note '" + note.NoteId.String() + "' share password '" + sharePwd + "'")
+
+	if sharePwd == "" {
+		return c.RenderJSON(info.Re{Ok: res, Msg: c.Message("Password_protection_removed"), MsgType: "warning"})
+	} else {
+		return c.RenderJSON(info.Re{Ok: res, Msg: c.Message("The protection password has been changed")})
+	}
+}
+
+func (c Share) UpdateSecret(dataId string, typeName string, sharePwd string) revel.Result {
+	if !c.HasLogined() {
+		return c.Redirect("/login")
+	}
+
+	if typeName == "book" {
+		return UpdateBookSecret(c, dataId, sharePwd)
+	} else {
+		return UpdateNoteSecret(c, dataId, sharePwd)
+	}
+}
+
 // 查看note的分享信息
 // 分享给了哪些用户和权限
 // ShareNotes表 userId = me, noteId = ...
@@ -111,7 +228,7 @@ func (c Share) ListNotebookShareUserInfo(notebookId string) revel.Result {
 	return c.RenderTemplate("share/note_notebook_share_user_infos.html")
 }
 
-//------------
+// ------------
 // 改变share note 权限
 func (c Share) UpdateShareNotePerm(noteId string, perm int, toUserId string) revel.Result {
 	return c.RenderJSON(shareService.UpdateShareNotePerm(noteId, perm, c.GetUserId(), toUserId))
@@ -122,7 +239,7 @@ func (c Share) UpdateShareNotebookPerm(notebookId string, perm int, toUserId str
 	return c.RenderJSON(shareService.UpdateShareNotebookPerm(notebookId, perm, c.GetUserId(), toUserId))
 }
 
-//---------------
+// ---------------
 // 删除share note
 func (c Share) DeleteShareNote(noteId string, toUserId string) revel.Result {
 	return c.RenderJSON(shareService.DeleteShareNote(noteId, c.GetUserId(), toUserId))

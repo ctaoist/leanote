@@ -23,29 +23,29 @@
 			<div class="navbar-header logo-ctn">
 				<a href="/admin/index" class="navbar-brand clearfix" data-toggle="fullscreen">
 					<span id="logo"></span>
-					<span class="logo-title">Admin</span>
+					<span class="logo-title">{{msg . "Admin"}}</span>
 				</a>
 			</div>
 			
 			<ul class="nav navbar-nav navbar-right m-n hidden-xs nav-user">
 				<li class="hidden-xs">
 					<a href="/" class="dk">
-						Home
+						{{msg . "home"}}
 					</a>
 				</li>
 				<li class="hidden-xs">
 					<a href="/note" class="dk">
-						My Note
+						{{msg . "myNote"}}
 					</a>
 				</li>
 				<li class="hidden-xs">
 					<a href="/blog" class="dk">
-						My Blog
+						{{msg . "myBlog"}}
 					</a>
 				</li>
 				<li class="hidden-xs">
 					<a href="/logout" class="dk">
-						Logout
+						{{msg . "logout"}}
 					</a>
 				</li>
 			</ul>

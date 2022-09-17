@@ -714,6 +714,12 @@ Notebook.shareNotebooks= function(target) {
 	
 	shareNoteOrNotebook(notebookId, false);
 }
+// 给笔记本设置密码
+Notebook.setSecret = function (target) {
+	var notebookId = $(target).attr("notebookId");
+
+	showDialogRemote("/share/secret", {typeName: 'book', dataId: notebookId});
+}
 
 //-----------------------------
 // 设为blog/unset
@@ -843,6 +849,10 @@ Notebook.deleteNotebook = function(target) {
 	if(!notebookId) {
 		return;
 	}
+
+	if ( !confirm(getMsg('confirmDeleteComment')) ) {
+		return;
+	}
 	
 	ajaxGet("/notebook/deleteNotebook", {notebookId: notebookId}, function(ret) {
 		if(ret.Ok) {
@@ -893,6 +903,8 @@ $(function() {
 			{ type: "splitLine" },
 			{ text: getMsg("publicAsBlog"), alias: 'set2Blog', faIcon: "fa-bold", action: Notebook.setNotebook2Blog },
 			{ text: getMsg("cancelPublic"), alias: 'unset2Blog',faIcon: "fa-undo", action: Notebook.setNotebook2Blog }, // Unset
+			// 访问密码
+			{ text: getMsg("accessSecret"), alias: 'setSecret', icon: "", faIcon: "fa-lock", action: Notebook.setSecret},
 			{ type: "splitLine" },
 			{ text: getMsg("addChildNotebook"), faIcon: "fa-sitemap", action: Notebook.addChildNotebook },
 			{ text: getMsg("rename"), faIcon: "fa-pencil", action: Notebook.updateNotebookTitle },

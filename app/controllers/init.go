@@ -31,6 +31,7 @@ var configService *service.ConfigService
 var emailService *service.EmailService
 var sessionService *service.SessionService
 var themeService *service.ThemeService
+var keepAliveService *service.KeepAliveService
 
 var pageSize = 1000
 var defaultSortField = "UpdatedTime"
@@ -136,6 +137,7 @@ func InitService() {
 	emailService = service.EmailS
 	sessionService = service.SessionS
 	themeService = service.ThemeS
+	keepAliveService = service.KeepAliveS
 }
 
 // 初始化博客模板
