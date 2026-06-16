@@ -1,0 +1,5 @@
+web-src/node_modules
+web-src/dist
+web-src/package-lock.json
+leanote
+config.yaml

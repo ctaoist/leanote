@@ -1,0 +1,46 @@
+# leanote-server configuration (YAML).
+#
+# Copy this file to `config.yaml` (auto-discovered in the working dir or next to
+# the binary), or pass an explicit path:  ./leanote-server -config /etc/leanote.yaml
+# You can also point at it with the CONFIG_FILE env var.
+#
+# Precedence (low → high):  built-in defaults  <  this file  <  environment vars.
+# Every key is optional; omitted keys fall back to the env var, then the default.
+
+# MongoDB connection string (reuses the existing leanote database).
+mongo_uri: "mongodb://user:password@127.0.0.1:27017/leanote?authSource=admin"
+
+# Database name. Point at a copy/backup to exercise writes safely.
+mongo_db: leanote
+
+# HTTP listen port (the single binary serves both the SPA and the API here).
+port: "9016"
+
+# On-disk root for images/attachments/avatars (the live install, so legacy files
+# resolve and new files land beside them).
+file_root: /leanote
+
+# Session cookie secret — change this in production.
+session_secret: change-me-in-production
+
+# Session lifetime (Go duration: 72h, 30m, etc.).
+session_ttl: 72h
+
+# Admin username for this database (gates the /admin/* endpoints).
+admin_username: user
+
+# ----- Host-based blog routing (optional; both empty = disabled) -----
+#
+# When set, a user's blog can be served at a host ROOT (no /blog/<user> prefix):
+#   - subdomain:      <user's SubDomain>.<blog_base_domain>   (needs blog_base_domain + wildcard DNS)
+#   - custom domain:  the user's bound Domain                  (needs the user to CNAME it here)
+# Users set their SubDomain / Domain under 设置 → 博客设置.
+#
+# app_host: the main application's hostname. Requests to it (and to localhost / a
+# bare IP / the base-domain apex) short-circuit blog routing with NO DB lookup —
+# set this in production so normal app traffic stays cheap.
+app_host: ""
+# blog_base_domain: the base domain for subdomain blogs (e.g. "leanote.example.com",
+# so "alice.leanote.example.com" resolves to the user whose blog SubDomain is "alice").
+blog_base_domain: ""
+

@@ -1,0 +1,321 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 语义色变量：浅色 / 深色。值为 "R G B"（供 rgb(var(--x) / alpha) 使用）。 */
+:root {
+  --c-bg: 247 248 250; /* 页面底色 */
+  --c-surface: 255 255 255; /* 卡片/面板 */
+  --c-elevated: 255 255 255; /* 浮层 */
+  --c-border: 232 236 240; /* #E8ECF0 */
+  --c-fg: 28 33 41; /* 主文字 */
+  --c-muted: 100 112 124; /* 次要文字 */
+  --c-subtle: 148 158 168; /* 更弱文字/占位 */
+  --c-accent: 15 178 100; /* #0fb264 品牌绿 */
+  --c-accent-fg: 255 255 255;
+
+  /* CodeMirror 代码块 token 配色（与预览 Prism 一致，GitHub 浅色） */
+  --cm-comment: #6a737d;
+  --cm-punct: #6b7280;
+  --cm-keyword: #d73a49;
+  --cm-string: #22863a;
+  --cm-tag: #22863a;
+  --cm-number: #005cc5;
+  --cm-function: #6f42c1;
+  --cm-class: #6f42c1;
+  --cm-variable: #e36209;
+
+  color-scheme: light;
+}
+
+.dark {
+  --c-bg: 17 21 26;
+  --c-surface: 24 29 36;
+  --c-elevated: 30 36 44;
+  --c-border: 42 50 60;
+  --c-fg: 226 231 237;
+  --c-muted: 156 167 178;
+  --c-subtle: 110 121 132;
+  --c-accent: 45 190 125;
+  --c-accent-fg: 8 18 13;
+
+  /* CodeMirror 代码块 token 配色（GitHub 深色） */
+  --cm-comment: #8b949e;
+  --cm-punct: #c9d1d9;
+  --cm-keyword: #ff7b72;
+  --cm-string: #a5d6ff;
+  --cm-tag: #7ee787;
+  --cm-number: #79c0ff;
+  --cm-function: #d2a8ff;
+  --cm-class: #ffa657;
+  --cm-variable: #ffa657;
+
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-bg text-fg font-sans antialiased;
+  margin: 0;
+}
+
+/* 细滚动条 */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--c-border)) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: rgb(var(--c-border));
+  border-radius: 9999px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(var(--c-subtle));
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 h-10 text-sm font-medium
+      transition-colors select-none disabled:opacity-50 disabled:pointer-events-none
+      focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40;
+  }
+  .btn-primary {
+    @apply btn bg-brand-500 text-white hover:bg-brand-600 active:bg-brand-700;
+  }
+  .btn-ghost {
+    @apply btn bg-transparent text-fg hover:bg-black/5 dark:hover:bg-white/5;
+  }
+  .btn-outline {
+    @apply btn border border-border bg-surface text-fg hover:bg-black/[0.03] dark:hover:bg-white/[0.04];
+  }
+  .input {
+    @apply h-10 w-full rounded-lg border border-border bg-surface px-3 text-sm text-fg
+      placeholder:text-subtle focus:outline-none focus:ring-2 focus:ring-brand-500/30
+      focus:border-brand-500/60 transition;
+  }
+  .card {
+    @apply rounded-xl border border-border bg-surface shadow-card;
+  }
+}
+
+/* ============ Markdown 预览：代码块 / 行内码 ============ */
+/* 覆盖 @tailwindcss/typography 的默认深底代码块，统一用语义色。 */
+.prose pre {
+  position: relative;
+  background-color: rgb(var(--c-bg));
+  color: rgb(var(--c-fg));
+  border: 1px solid rgb(var(--c-border));
+  border-radius: 0.5rem;
+  padding: 0.85rem 1rem;
+  overflow-x: auto;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* 代码块右上角悬浮「复制」按钮：移入显示、移出隐藏 */
+.prose pre > .code-copy-btn {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  margin: 0;
+  border: 1px solid rgb(var(--c-border));
+  border-radius: 0.375rem;
+  background-color: rgb(var(--c-surface));
+  color: rgb(var(--c-muted));
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+.prose pre:hover > .code-copy-btn,
+.prose pre > .code-copy-btn:focus-visible {
+  opacity: 1;
+}
+.prose pre > .code-copy-btn:hover {
+  color: rgb(var(--c-fg));
+  border-color: rgb(var(--c-subtle));
+}
+.prose pre > .code-copy-btn.copied {
+  opacity: 1;
+  color: rgb(var(--c-accent));
+  border-color: rgb(var(--c-accent) / 0.5);
+}
+.prose pre > .code-copy-btn svg {
+  width: 14px;
+  height: 14px;
+}
+.prose pre code {
+  background: none;
+  padding: 0;
+  font-size: inherit;
+  color: inherit;
+  font-weight: inherit;
+}
+.prose :not(pre) > code {
+  background-color: rgb(var(--c-fg) / 0.06);
+  border-radius: 0.3rem;
+  padding: 0.12em 0.38em;
+  font-size: 0.86em;
+  font-weight: 500;
+}
+.dark .prose :not(pre) > code {
+  background-color: rgb(var(--c-fg) / 0.1);
+}
+/* typography 给行内码加的反引号去掉 */
+.prose :not(pre) > code::before,
+.prose :not(pre) > code::after {
+  content: none;
+}
+
+/* ============ Prism 代码高亮主题（明/暗）============ */
+.prose .token.comment,
+.prose .token.prolog,
+.prose .token.doctype,
+.prose .token.cdata {
+  color: #6a737d;
+  font-style: italic;
+}
+.prose .token.punctuation {
+  color: #6b7280;
+}
+.prose .token.keyword,
+.prose .token.operator,
+.prose .token.atrule {
+  color: #d73a49;
+}
+.prose .token.string,
+.prose .token.char,
+.prose .token.attr-value,
+.prose .token.inserted,
+.prose .token.tag,
+.prose .token.property,
+.prose .token.selector,
+.prose .token.attr-name,
+.prose .token.symbol {
+  color: #22863a;
+}
+.prose .token.number,
+.prose .token.boolean,
+.prose .token.constant {
+  color: #005cc5;
+}
+.prose .token.function,
+.prose .token.class-name {
+  color: #6f42c1;
+}
+.prose .token.variable,
+.prose .token.regex,
+.prose .token.important {
+  color: #e36209;
+}
+.prose .token.deleted {
+  color: #b31d28;
+}
+
+.dark .prose .token.comment,
+.dark .prose .token.prolog,
+.dark .prose .token.doctype,
+.dark .prose .token.cdata {
+  color: #8b949e;
+}
+.dark .prose .token.punctuation {
+  color: #c9d1d9;
+}
+.dark .prose .token.keyword,
+.dark .prose .token.operator,
+.dark .prose .token.atrule {
+  color: #ff7b72;
+}
+.dark .prose .token.string,
+.dark .prose .token.char,
+.dark .prose .token.attr-value,
+.dark .prose .token.inserted {
+  color: #a5d6ff;
+}
+.dark .prose .token.tag,
+.dark .prose .token.property,
+.dark .prose .token.selector,
+.dark .prose .token.attr-name,
+.dark .prose .token.symbol {
+  color: #7ee787;
+}
+.dark .prose .token.number,
+.dark .prose .token.boolean,
+.dark .prose .token.constant {
+  color: #79c0ff;
+}
+.dark .prose .token.function {
+  color: #d2a8ff;
+}
+.dark .prose .token.class-name,
+.dark .prose .token.variable,
+.dark .prose .token.regex,
+.dark .prose .token.important {
+  color: #ffa657;
+}
+.dark .prose .token.deleted {
+  color: #ffa198;
+}
+
+/* ============ KaTeX ============ */
+.prose .katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.4em 0;
+}
+
+/* ============ mermaid ============ */
+.prose .mermaid {
+  display: flex;
+  justify-content: center;
+  margin: 1em 0;
+}
+.prose .mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
+.prose pre[data-mermaid-error] {
+  border-color: rgb(220 38 38 / 0.5);
+}
