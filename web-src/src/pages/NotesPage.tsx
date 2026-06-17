@@ -70,7 +70,7 @@ export default function NotesPage() {
   });
 
   return (
-    <div class="flex h-screen flex-col overflow-hidden bg-bg">
+    <div class="flex h-dvh flex-col overflow-hidden bg-bg">
       <Show when={!appState.immersive}>
         <AppHeader />
       </Show>

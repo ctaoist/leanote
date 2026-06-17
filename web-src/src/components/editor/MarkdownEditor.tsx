@@ -497,8 +497,9 @@ export function MarkdownEditor(props: MarkdownEditorProps) {
     <div class="flex h-full flex-col">
       {/* 工具栏：格式化（左）+ 配图/模式（右） */}
       <Show when={props.editable}>
-        <div class="flex flex-wrap items-center gap-0.5 border-b border-border px-3 py-1.5">
-          {/* 格式化按钮：编辑器隐藏时（纯预览）无操作对象，故仅在非纯预览时显示 */}
+        <div class="flex items-center gap-1 border-b border-border px-2 py-1.5 sm:px-3">
+          {/* 格式化按钮组：窄屏横向滚动，不再折行。纯预览时无操作对象故隐藏。 */}
+          <div class="flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto no-scrollbar [&>*]:shrink-0">
           <Show when={effectiveMode() !== "preview"}>
             <ToolBtn title="标题 1" onClick={() => setHeading(1)}>
               <Heading1 size={16} />
@@ -546,8 +547,9 @@ export function MarkdownEditor(props: MarkdownEditorProps) {
               <Minus size={16} />
             </ToolBtn>
           </Show>
+          </div>
 
-          <div class="ml-auto flex items-center gap-0.5">
+          <div class="flex shrink-0 items-center gap-0.5">
             <ToolBtn title="插入图片" onClick={() => setShowPicker(true)}>
               <ImageIcon size={16} />
             </ToolBtn>
@@ -555,9 +557,11 @@ export function MarkdownEditor(props: MarkdownEditorProps) {
             <ToolBtn title="仅编辑" active={mode() === "edit"} onClick={() => setMode("edit")}>
               <Pencil size={16} />
             </ToolBtn>
-            <ToolBtn title="分栏" active={mode() === "split"} onClick={() => setMode("split")}>
-              <Columns2 size={16} />
-            </ToolBtn>
+            <Show when={!isMobile()}>
+              <ToolBtn title="分栏" active={mode() === "split"} onClick={() => setMode("split")}>
+                <Columns2 size={16} />
+              </ToolBtn>
+            </Show>
             <ToolBtn title="仅预览" active={mode() === "preview"} onClick={() => setMode("preview")}>
               <Eye size={16} />
             </ToolBtn>

@@ -11,7 +11,7 @@ interface AuthLayoutProps {
 
 export function AuthLayout(props: AuthLayoutProps) {
   return (
-    <div class="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-bg px-4 py-10">
+    <div class="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden bg-bg px-4 py-10">
       {/* 背景装饰：品牌绿光晕 */}
       <div class="pointer-events-none absolute inset-0 -z-10">
         <div class="absolute -left-32 -top-32 h-96 w-96 rounded-full bg-brand-300/30 blur-3xl" />

@@ -1,0 +1,105 @@
+name: Build Release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  GO_VERSION: "1.25.5"
+  NODE_VERSION: "24"
+
+jobs:
+  build:
+    name: Build ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: linux-amd64
+            goos: linux
+            goarch: amd64
+            binary: leanote
+            archive: leanote-linux-amd64.tar.gz
+          - name: linux-aarch64
+            goos: linux
+            goarch: arm64
+            binary: leanote
+            archive: leanote-linux-aarch64.tar.gz
+          - name: windows-x64
+            goos: windows
+            goarch: amd64
+            binary: leanote.exe
+            archive: leanote-windows-x64.zip
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: web-src/package-lock.json
+
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: web-src
+
+      - name: Build frontend
+        run: npm run build
+        working-directory: web-src
+
+      - name: Resolve version
+        id: version
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="$(gh api "repos/${GITHUB_REPOSITORY}/releases/latest" --jq '.tag_name')"
+          if [ -z "$tag" ]; then
+            echo "No latest release found. Create a GitHub release before running this workflow." >&2
+            exit 1
+          fi
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+
+      - name: Build binary
+        env:
+          CGO_ENABLED: "0"
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+        run: |
+          mkdir -p build
+          go build -trimpath -ldflags="-s -w -X main.version=${{ steps.version.outputs.tag }}" -o "build/${{ matrix.binary }}" .
+
+      - name: Package Linux build
+        if: matrix.goos == 'linux'
+        run: |
+          mkdir -p dist
+          cp README.md config.example.yaml build/
+          tar -C build -czf "dist/${{ matrix.archive }}" "${{ matrix.binary }}" README.md config.example.yaml
+
+      - name: Package Windows build
+        if: matrix.goos == 'windows'
+        run: |
+          mkdir -p dist
+          cp README.md config.example.yaml build/
+          cd build
+          zip "../dist/${{ matrix.archive }}" "${{ matrix.binary }}" README.md config.example.yaml
+
+      - name: Generate checksum
+        run: sha256sum "dist/${{ matrix.archive }}" > "dist/${{ matrix.archive }}.sha256"
+
+      - name: Upload to latest release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload "${{ steps.version.outputs.tag }}" "dist/${{ matrix.archive }}" "dist/${{ matrix.archive }}.sha256" --repo "$GITHUB_REPOSITORY" --clobber

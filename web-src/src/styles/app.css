@@ -135,6 +135,15 @@ body {
   }
 }
 
+/* 隐藏滚动条（用于横向滚动的工具栏 / Tab 条，避免出现 8px 横向滚动条）。 */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* ============ Markdown 预览：代码块 / 行内码 ============ */
 /* 覆盖 @tailwindcss/typography 的默认深底代码块，统一用语义色。 */
 .prose pre {
@@ -172,6 +181,12 @@ body {
 .prose pre:hover > .code-copy-btn,
 .prose pre > .code-copy-btn:focus-visible {
   opacity: 1;
+}
+/* 触摸设备无 hover：复制按钮常驻可见 */
+@media (hover: none) {
+  .prose pre > .code-copy-btn {
+    opacity: 1;
+  }
 }
 .prose pre > .code-copy-btn:hover {
   color: rgb(var(--c-fg));

@@ -22,22 +22,22 @@ export const Modal: ParentComponent<ModalProps> = (props) => {
           }}
         >
           <div
-            class="w-full overflow-hidden rounded-xl border border-border bg-surface shadow-pop"
+            class="flex max-h-[calc(100dvh-2rem)] w-full flex-col overflow-hidden rounded-xl border border-border bg-surface shadow-pop"
             style={{ "max-width": props.width ?? "440px" }}
             role="dialog"
             aria-modal="true"
           >
             <Show when={props.title}>
-              <div class="flex items-center justify-between border-b border-border px-5 py-3.5">
+              <div class="flex shrink-0 items-center justify-between border-b border-border px-5 py-3.5">
                 <h3 class="text-base font-semibold text-fg">{props.title}</h3>
                 <IconButton label="关闭" onClick={props.onClose}>
                   <X size={18} />
                 </IconButton>
               </div>
             </Show>
-            <div class="px-5 py-4">{props.children}</div>
+            <div class="min-h-0 overflow-y-auto px-5 py-4">{props.children}</div>
             <Show when={props.footer}>
-              <div class="flex justify-end gap-2 border-t border-border px-5 py-3.5">
+              <div class="flex shrink-0 justify-end gap-2 border-t border-border px-5 py-3.5">
                 {props.footer}
               </div>
             </Show>

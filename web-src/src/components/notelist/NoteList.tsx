@@ -197,7 +197,7 @@ function NoteListItem(props: { note: Note; compact: boolean }) {
             width="184px"
             trigger={({ toggle }) => (
               <button
-                class="flex h-6 w-6 items-center justify-center rounded text-subtle opacity-0 transition-opacity hover:bg-black/10 group-hover:opacity-100 dark:hover:bg-white/10"
+                class="flex h-6 w-6 items-center justify-center rounded text-subtle opacity-0 transition-opacity hover:bg-black/10 group-hover:opacity-100 touch:opacity-100 dark:hover:bg-white/10"
                 onClick={(e) => { e.stopPropagation(); setPicker(null); toggle(); }}
               >
                 <MoreVertical size={15} />

@@ -15,7 +15,7 @@ export default function HomePage() {
   const loggedIn = hasSessionCookie();
 
   return (
-    <div class="min-h-screen bg-bg">
+    <div class="min-h-dvh bg-bg">
       {/* 顶栏 */}
       <header class="sticky top-0 z-30 border-b border-border/70 bg-bg/80 backdrop-blur">
         <div class="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
@@ -59,7 +59,7 @@ export default function HomePage() {
               {loggedIn ? "进入我的笔记" : "免费开始"} <ArrowRight size={18} />
             </A>
             <a
-              href="https://github.com/leanote/leanote"
+              href="https://github.com/ctaoist/leanote"
               target="_blank"
               rel="noreferrer"
               class="btn-outline h-11 px-6 text-base gap-2"
@@ -95,7 +95,7 @@ export default function HomePage() {
       <footer class="border-t border-border">
         <div class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-5 py-8 text-sm text-subtle sm:flex-row">
           <BrandLogo size={18} />
-          <span>© {new Date().getFullYear()} Leanote · 蚂蚁笔记 · 现代化复刻</span>
+          <span>© {new Date().getFullYear()} Leanote · 蚂蚁笔记</span>
         </div>
       </footer>
     </div>

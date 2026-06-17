@@ -36,6 +36,14 @@ cd .. && CGO_ENABLED=0 go build -ldflags="-s -w" -o leanote .
 PORT=9016 ./leanote          # open http://<host>:9016/
 ```
 
+## 版本号
+
+```bash
+./leanote version       # 或 ./leanote -version / ./leanote -v
+```
+
+发布构建通过 `-ldflags "-X main.version=<tag>"` 注入版本号; 从源码 `go build` 时回退为 Go 工具链内嵌的 git 提交号 (例如 `dev+303ef6956856`)。
+
 ## 配置
 
 配置优先级: **内部默认值 < YAML 配置文件 < 环境变量**.
@@ -55,3 +63,8 @@ PORT=9016 ./leanote          # open http://<host>:9016/
 | `session_secret` | `SESSION_SECRET` | `dev-insecure-...` | Session secret — change in production |
 | `session_ttl` | `SESSION_TTL` | `72h` | Session cookie + TTL index lifetime |
 | `admin_username` | `ADMIN_USERNAME` | `user` | Admin username (this DB's admin) |
+| `pagefind_bin` | `PAGEFIND_BIN` | `` | Pagefind_extended full path - Add search functionality to a static blog |
+
+## 静态博客的搜索功能
+
+使用 [Pagefind](https://github.com/Pagefind/pagefind) 为静态博客带来完全离线的搜索体验，带宽占用低，性能强。

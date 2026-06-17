@@ -111,7 +111,7 @@ export function NoteEditor() {
             </div>
 
             {/* 标题 + 标签 */}
-            <div class="shrink-0 px-6 pt-5">
+            <div class="shrink-0 px-4 pt-5 sm:px-6">
               <input
                 class="w-full bg-transparent text-2xl font-bold text-fg placeholder:text-subtle focus:outline-none disabled:cursor-default"
                 placeholder="无标题"

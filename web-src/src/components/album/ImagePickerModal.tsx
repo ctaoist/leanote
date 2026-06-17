@@ -288,9 +288,9 @@ export function ImagePickerModal(props: Props) {
       </div>
 
       <Show when={tab() === "browse"} fallback={uploadTab()}>
-        <div class="flex h-[520px] gap-4">
-          {/* 左：相册 */}
-          <div class="flex w-48 shrink-0 flex-col">
+        <div class="flex h-[70dvh] flex-col gap-3 sm:h-[520px] sm:flex-row sm:gap-4">
+          {/* 左：相册（移动端横置于顶部、限高；桌面端固定左栏） */}
+          <div class="flex shrink-0 flex-col sm:w-48">
             <div class="mb-2 flex items-center justify-between">
               <span class="text-xs font-semibold uppercase tracking-wide text-subtle">
                 {isS3() ? "相册（前缀）" : "相册"}
@@ -306,7 +306,7 @@ export function ImagePickerModal(props: Props) {
                 </button>
               </Show>
             </div>
-            <div class="min-h-0 flex-1 space-y-0.5 overflow-y-auto">
+            <div class="min-h-0 max-h-28 space-y-0.5 overflow-y-auto sm:max-h-none sm:flex-1">
               <AlbumRow active={currentAlbum() === null} name={allLabel()} onClick={() => selectAlbum(null)} />
               <For each={albums()}>
                 {(album) => (
@@ -353,7 +353,7 @@ export function ImagePickerModal(props: Props) {
                     </div>
                   }
                 >
-                  <div class="grid grid-cols-4 gap-3">
+                  <div class="grid grid-cols-[repeat(auto-fill,minmax(6rem,1fr))] gap-2 sm:grid-cols-4 sm:gap-3">
                     <For each={images()}>
                       {(img) => (
                         <div
@@ -365,12 +365,12 @@ export function ImagePickerModal(props: Props) {
                           <button
                             type="button"
                             title="删除"
-                            class="absolute right-1 top-1 z-10 flex h-6 w-6 items-center justify-center rounded-md bg-black/45 text-white opacity-0 backdrop-blur transition-opacity hover:bg-red-500/80 group-hover:opacity-100"
+                            class="absolute right-1 top-1 z-10 flex h-6 w-6 items-center justify-center rounded-md bg-black/45 text-white opacity-0 backdrop-blur transition-opacity hover:bg-red-500/80 group-hover:opacity-100 touch:opacity-100"
                             onClick={(e) => void delImage(img, e)}
                           >
                             <Trash2 size={13} />
                           </button>
-                          <div class="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent px-2 pb-1.5 pt-4 opacity-0 transition-opacity group-hover:opacity-100">
+                          <div class="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent px-2 pb-1.5 pt-4 opacity-0 transition-opacity group-hover:opacity-100 touch:opacity-100">
                             <div class="truncate text-[11px] text-white/90">{img.title}</div>
                             <Show when={img.size}>
                               <div class="text-[10px] text-white/60">{formatSize(img.size)}</div>
@@ -492,7 +492,7 @@ function AlbumRow(props: {
       <Images size={15} class="shrink-0 opacity-70" />
       <span class="min-w-0 flex-1 truncate">{props.name}</span>
       <Show when={props.onRename || props.onDelete}>
-        <div class="flex shrink-0 gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+        <div class="flex shrink-0 gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 touch:opacity-100">
           <Show when={props.onRename}>
             <button
               class="rounded p-1 text-muted hover:text-fg"

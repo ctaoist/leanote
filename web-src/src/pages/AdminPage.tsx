@@ -35,12 +35,12 @@ export default function AdminPage() {
     <Show
       when={ready()}
       fallback={
-        <div class="flex h-screen items-center justify-center text-muted">
+        <div class="flex h-dvh items-center justify-center text-muted">
           <Loader2 size={26} class="animate-spin" />
         </div>
       }
     >
-      <div class="flex h-screen flex-col bg-bg text-fg">
+      <div class="flex h-dvh flex-col bg-bg text-fg">
         <header class="flex h-14 shrink-0 items-center gap-3 border-b border-border px-4">
           <button
             type="button"
@@ -56,8 +56,8 @@ export default function AdminPage() {
           </span>
         </header>
 
-        <div class="flex min-h-0 flex-1">
-          <nav class="w-52 shrink-0 space-y-1 border-r border-border p-3">
+        <div class="flex min-h-0 flex-1 flex-col lg:flex-row">
+          <nav class="flex shrink-0 gap-1 overflow-x-auto no-scrollbar border-b border-border p-2 lg:w-52 lg:flex-col lg:space-y-1 lg:overflow-visible lg:border-b-0 lg:border-r lg:p-3">
             <Show when={isAdmin()}>
               <NavItem active={tab() === "dashboard"} icon={<LayoutDashboard size={17} />} onClick={() => setTab("dashboard")}>
                 仪表盘
@@ -107,7 +107,7 @@ function NavItem(props: { active: boolean; icon: JSX.Element; onClick: () => voi
     <button
       type="button"
       onClick={props.onClick}
-      class={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors
+      class={`flex w-auto shrink-0 items-center gap-2.5 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition-colors lg:w-full
         ${props.active ? "bg-brand-500/10 text-brand-600" : "text-muted hover:bg-black/5 hover:text-fg dark:hover:bg-white/5"}`}
     >
       {props.icon}

@@ -214,16 +214,16 @@ export function AlbumModal(props: AlbumModalProps) {
 
   return (
     <Modal open={props.open} onClose={props.onClose} title={props.onPick ? "选择图片" : "图片库"} width="920px">
-      <div class="flex h-[560px] gap-4">
-        {/* 左：相册列表 */}
-        <div class="flex w-48 shrink-0 flex-col">
+      <div class="flex h-[70dvh] flex-col gap-3 sm:h-[560px] sm:flex-row sm:gap-4">
+        {/* 左：相册列表（移动端横置于顶部、限高；桌面端固定左栏） */}
+        <div class="flex shrink-0 flex-col sm:w-48">
           <div class="mb-2 flex items-center justify-between">
             <span class="text-xs font-semibold uppercase tracking-wide text-subtle">相册</span>
             <IconButton label="新建相册" onClick={() => void addAlbum()}>
               <Plus size={16} />
             </IconButton>
           </div>
-          <div class="min-h-0 flex-1 space-y-0.5 overflow-y-auto">
+          <div class="min-h-0 max-h-28 space-y-0.5 overflow-y-auto sm:max-h-none sm:flex-1">
             <AlbumRow
               active={currentAlbumId() === ""}
               name="全部图片"
@@ -284,7 +284,7 @@ export function AlbumModal(props: AlbumModalProps) {
                   </div>
                 }
               >
-                <div class="grid grid-cols-4 gap-3">
+                <div class="grid grid-cols-[repeat(auto-fill,minmax(6rem,1fr))] gap-2 sm:grid-cols-4 sm:gap-3">
                   <For each={images()}>
                     {(img) => (
                       <div
@@ -295,7 +295,7 @@ export function AlbumModal(props: AlbumModalProps) {
                       >
                         <img src={imgUrl(img)} alt={img.Title ?? ""} class="h-full w-full object-cover" loading="lazy" />
                         {/* 悬浮操作 */}
-                        <div class="pointer-events-none absolute inset-0 flex flex-col justify-between bg-gradient-to-t from-black/60 via-transparent to-black/30 opacity-0 transition-opacity group-hover:opacity-100">
+                        <div class="pointer-events-none absolute inset-0 flex flex-col justify-between bg-gradient-to-t from-black/60 via-transparent to-black/30 opacity-0 transition-opacity group-hover:opacity-100 touch:opacity-100">
                           <div class="pointer-events-auto flex justify-end gap-1 p-1.5">
                             <CellBtn label="复制 Markdown" onClick={(e) => void copyMarkdown(img, e)}>
                               <Copy size={13} />
@@ -361,7 +361,7 @@ function AlbumRow(props: {
       <Images size={15} class="shrink-0 opacity-70" />
       <span class="min-w-0 flex-1 truncate">{props.name}</span>
       <Show when={props.onRename}>
-        <div class="flex shrink-0 gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+        <div class="flex shrink-0 gap-0.5 opacity-0 transition-opacity group-hover:opacity-100 touch:opacity-100">
           <button
             class="rounded p-1 text-muted hover:text-fg"
             title="重命名"

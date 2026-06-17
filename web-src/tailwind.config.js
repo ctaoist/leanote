@@ -1,6 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 import forms from "@tailwindcss/forms";
 import typography from "@tailwindcss/typography";
+import plugin from "tailwindcss/plugin";
 
 // 语义色映射到 CSS 变量（在 src/styles/app.css 的 :root / .dark 中定义），
 // 便于后续暗色模式切换。brand 绿色基于 leanote 主色 #0fb264。
@@ -62,5 +63,12 @@ export default {
       },
     },
   },
-  plugins: [forms, typography],
+  plugins: [
+    forms,
+    typography,
+    // 触摸设备变体：用于让「hover 才显示」的行内操作在无 hover 的手机/平板上常驻可见。
+    plugin(({ addVariant }) => {
+      addVariant("touch", "@media (hover: none)");
+    }),
+  ],
 };

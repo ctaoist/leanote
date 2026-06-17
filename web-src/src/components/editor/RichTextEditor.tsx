@@ -85,7 +85,7 @@ export function RichTextEditor(props: RichTextEditorProps) {
   return (
     <div class="flex h-full flex-col">
       <Show when={props.editable}>
-        <div class="flex flex-wrap items-center gap-0.5 border-b border-border px-3 py-1.5">
+        <div class="flex flex-nowrap items-center gap-0.5 overflow-x-auto no-scrollbar border-b border-border px-3 py-1.5 [&>*]:shrink-0">
           <For each={headingButtons}>
             {(b) => (
               <ToolBtn
