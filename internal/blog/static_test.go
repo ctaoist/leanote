@@ -9,6 +9,61 @@ import (
 	"testing"
 )
 
+// TestPlainText strips HTML/markdown to searchable text and collapses whitespace.
+func TestPlainText(t *testing.T) {
+	cases := []struct{ in, want string }{
+		{"# 标题\n\n正文 **粗体** 内容", "标题 正文 粗体 内容"},
+		{"see [the docs](https://x/y) here", "see the docs here"},
+		{"![alt](https://img/x.png) after", "after"},
+		{"<p>html <b>tags</b></p> gone", "html tags gone"},
+		{"a\t\t b\n\nc", "a b c"},
+	}
+	for _, c := range cases {
+		if got := plainText(c.in); got != c.want {
+			t.Fatalf("plainText(%q) = %q, want %q", c.in, got, c.want)
+		}
+	}
+}
+
+// TestInjectPagefind places the glue module before </body> and bakes in the base
+// path, falling back to appending when there is no </body>.
+func TestInjectPagefind(t *testing.T) {
+	out := injectPagefind("<html><body><div id=\"search-results\"></div></body></html>", "/repo")
+	if !strings.Contains(out, "leanote-pagefind") {
+		t.Fatalf("glue marker missing: %s", out)
+	}
+	if !strings.Contains(out, `PF_BASE = "/repo"`) {
+		t.Fatalf("base path not baked in: %s", out)
+	}
+	body := strings.Index(out, "</body>")
+	glue := strings.Index(out, "leanote-pagefind")
+	if glue < 0 || glue > body {
+		t.Fatalf("glue should precede </body> (glue=%d body=%d)", glue, body)
+	}
+	// No </body>: append instead.
+	out2 := injectPagefind("<div id=\"search-results\"></div>", "")
+	if !strings.Contains(out2, "leanote-pagefind") {
+		t.Fatalf("glue not appended when no </body>: %s", out2)
+	}
+}
+
+// TestCorpusDoc emits Pagefind metadata: a title, the real URL captured into the
+// "link" meta, and an indexable body that repeats the title.
+func TestCorpusDoc(t *testing.T) {
+	doc := corpusDoc("我的<标题>", "/post/foo/", "正文内容")
+	for _, want := range []string{
+		`data-pagefind-meta="title"`,
+		`data-pagefind-meta="link[href]"`,
+		`href="/post/foo/"`,
+		"data-pagefind-body",
+		"我的&lt;标题&gt;", // HTML-escaped title
+	} {
+		if !strings.Contains(doc, want) {
+			t.Fatalf("corpusDoc missing %q in:\n%s", want, doc)
+		}
+	}
+}
+
 // TestRewriteStaticPaging converts ?page=N links into clean /page/N/ dirs.
 func TestRewriteStaticPaging(t *testing.T) {
 	cases := []struct{ base, in, want string }{

@@ -44,3 +44,10 @@ app_host: ""
 # so "alice.leanote.example.com" resolves to the user whose blog SubDomain is "alice").
 blog_base_domain: ""
 
+# pagefind_bin: path to the Pagefind CLI used to build the static blog's full-text
+# search index when publishing/downloading a static site. Empty → auto-detect
+# "pagefind_extended" then "pagefind" on PATH. Use the *extended* build for proper
+# Chinese/Japanese word segmentation. If absent, static search is skipped (a clear
+# notice is shown on the search page).
+pagefind_bin: "path/to/pagefind_exetended"
+

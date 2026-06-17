@@ -71,7 +71,7 @@ func staticURLs(basePath string) URLConfig {
 		PostUrl:      basePath + "/post",
 		CateUrl:      basePath + "/cate",
 		CatesUrl:     basePath + "/cates",
-		SearchUrl:    basePath + "/search",
+		SearchUrl:    basePath + "/search/",
 		SingleUrl:    basePath + "/single",
 		ArchiveUrl:   basePath + "/archives",
 		TagsUrl:      basePath + "/tags",

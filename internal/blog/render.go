@@ -223,15 +223,27 @@ func (r *Renderer) render(ctx context.Context, w io.Writer, owner models.User, e
 		tmplName = "cate.html"
 
 	case "search":
-		page := req.Page
-		if page < 1 {
-			page = 1
+		if req.PerPage < 0 {
+			// Static generation: render every post (no server-side keyword
+			// filter — Pagefind filters client-side). The injected glue reads
+			// ?keywords= and queries the index; this full list is the no-JS /
+			// empty-query browse fallback.
+			paging, posts := r.ListBlogs(ctx, uid, oid.OID{}, 1, staticIndexCap, ub.SortField, ub.IsAsc, true)
+			args["posts"] = posts
+			args["paging"] = paging
+			args["pagingBaseUrl"] = urls.SearchUrl
+			args["keywords"] = ""
+		} else {
+			page := req.Page
+			if page < 1 {
+				page = 1
+			}
+			paging, posts := r.SearchBlogs(ctx, uid, req.Keyword, page, ub.PerPageSize, ub.SortField, ub.IsAsc)
+			args["posts"] = posts
+			args["paging"] = paging
+			args["keywords"] = req.Keyword
+			args["pagingBaseUrl"] = urls.SearchUrl + "/" + req.Keyword
 		}
-		paging, posts := r.SearchBlogs(ctx, uid, req.Keyword, page, ub.PerPageSize, ub.SortField, ub.IsAsc)
-		args["posts"] = posts
-		args["paging"] = paging
-		args["keywords"] = req.Keyword
-		args["pagingBaseUrl"] = urls.SearchUrl + "/" + req.Keyword
 		args["curIsSearch"] = true
 		tmplName = "search.html"
 

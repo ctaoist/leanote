@@ -27,6 +27,11 @@ type Config struct {
 	// resolves to the user whose blog SubDomain == "<sub>". Optional — leave empty
 	// to disable subdomain routing (custom domains still work via UserBlog.Domain).
 	BlogBaseDomain string
+	// PagefindBin is the path/name of the Pagefind CLI used to build the static
+	// blog's full-text search index at publish time. Empty → auto-detect
+	// "pagefind_extended" then "pagefind" on PATH. Use the *extended* build for
+	// Chinese/Japanese word segmentation.
+	PagefindBin string
 }
 
 // fileConfig is the YAML schema. All fields are strings and optional — an empty
@@ -43,6 +48,7 @@ type fileConfig struct {
 	AdminUsername string `yaml:"admin_username"`
 	AppHost        string `yaml:"app_host"`
 	BlogBaseDomain string `yaml:"blog_base_domain"`
+	PagefindBin    string `yaml:"pagefind_bin"`
 }
 
 // Load resolves config via auto-discovery: the CONFIG_FILE env var, else
@@ -80,6 +86,7 @@ func LoadFrom(explicitPath string) Config {
 		AdminUsername: pick("ADMIN_USERNAME", fc.AdminUsername, "user"),
 		AppHost:        pick("APP_HOST", fc.AppHost, ""),
 		BlogBaseDomain: pick("BLOG_BASE_DOMAIN", fc.BlogBaseDomain, ""),
+		PagefindBin:    pick("PAGEFIND_BIN", fc.PagefindBin, ""),
 	}
 }
 
