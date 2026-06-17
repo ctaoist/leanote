@@ -4,6 +4,7 @@ import { ApiError } from "../api/client";
 import { notebookApi, noteApi, bootstrapApi } from "../api/endpoints";
 import { pushToast } from "./toast";
 import { saveLastView, loadLastView } from "../lib/lastView";
+import { autoSaveMs } from "../lib/prefs";
 import type { Note, NoteAndContent, Notebook, User } from "../api/types";
 
 export type SortKey =
@@ -323,7 +324,8 @@ export const actions = {
     );
     setState("dirty", true);
     if (saveTimer) clearTimeout(saveTimer);
-    saveTimer = setTimeout(() => void actions.saveNow(), 1200);
+    // 自动保存间隔为用户可配置项（lib/prefs，存 localStorage）。
+    saveTimer = setTimeout(() => void actions.saveNow(), autoSaveMs());
   },
 
   async saveNow() {

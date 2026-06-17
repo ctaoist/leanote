@@ -1,4 +1,4 @@
-import { createMemo, createSignal, onCleanup, onMount, createEffect, Show } from "solid-js";
+import { createMemo, createSignal, onCleanup, onMount, createEffect, Show, For } from "solid-js";
 import { EditorView, keymap, placeholder } from "@codemirror/view";
 import { EditorState, EditorSelection, Compartment } from "@codemirror/state";
 import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands";
@@ -19,6 +19,7 @@ import {
   Heading3,
   List,
   ListOrdered,
+  ListTree,
   Quote,
   Code,
   Code2,
@@ -29,6 +30,7 @@ import {
 import { md, renderMermaid, decorateCodeBlocks } from "../../lib/markdown";
 import { isDark } from "../../lib/theme";
 import { isMobile } from "../../lib/responsive";
+import { Dropdown } from "../ui/Dropdown";
 import { ImagePickerModal } from "../album/ImagePickerModal";
 import { fileApi } from "../../api/endpoints";
 import { getImageBed, uploadToBed } from "../../lib/imageBed";
@@ -36,11 +38,28 @@ import { pushToast } from "../../state/toast";
 
 type Mode = "split" | "edit" | "preview";
 
+interface TocItem {
+  id: string;
+  text: string;
+  level: number;
+}
+
 interface MarkdownEditorProps {
   content: string;
   noteId: string;
   editable: boolean;
   onChange: (md: string) => void;
+}
+
+// 由标题文本生成 URL 友好的锚点 id（保留中文，其它非词字符折成连字符）。
+function slugify(text: string): string {
+  return (
+    text
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w一-鿿]+/g, "-")
+      .replace(/^-+|-+$/g, "") || "h"
+  );
 }
 
 const mdHighlight = HighlightStyle.define([
@@ -108,6 +127,7 @@ export function MarkdownEditor(props: MarkdownEditorProps) {
   const editableComp = new Compartment();
   const [mode, setMode] = createSignal<Mode>(isMobile() ? "edit" : "split");
   const [showPicker, setShowPicker] = createSignal(false);
+  const [toc, setToc] = createSignal<TocItem[]>([]);
 
   const previewHtml = createMemo(() => md.render(props.content || ""));
 
@@ -349,6 +369,36 @@ export function MarkdownEditor(props: MarkdownEditorProps) {
 
   const scheduleRebuild = () => requestAnimationFrame(buildAnchors);
 
+  // ----- 目录（TOC）-----
+  // 渲染后扫描预览区标题，补 id 并生成目录项；点击滚动到对应标题。
+  const buildToc = () => {
+    if (!previewEl) return;
+    const items: TocItem[] = [];
+    const seen = new Set<string>();
+    previewEl.querySelectorAll<HTMLElement>("h1, h2, h3, h4, h5, h6").forEach((el) => {
+      const text = (el.textContent || "").trim();
+      if (!text) return;
+      let id = el.id;
+      if (!id) {
+        const base = slugify(text);
+        id = base;
+        let k = 1;
+        while (seen.has(id)) id = `${base}-${k++}`;
+        el.id = id;
+      }
+      seen.add(id);
+      items.push({ id, text, level: Number(el.tagName.charAt(1)) });
+    });
+    setToc(items);
+  };
+
+  const scrollToHeading = (id: string) => {
+    if (!previewEl) return;
+    const el = previewEl.querySelector<HTMLElement>(`#${CSS.escape(id)}`);
+    if (!el) return;
+    previewEl.scrollTop += el.getBoundingClientRect().top - previewEl.getBoundingClientRect().top - 8;
+  };
+
   onMount(() => {
     view = new EditorView({
       parent: host,
@@ -413,6 +463,7 @@ export function MarkdownEditor(props: MarkdownEditorProps) {
     requestAnimationFrame(() => {
       if (!previewEl) return;
       decorateCodeBlocks(previewEl);
+      buildToc();
       void renderMermaid(previewEl, isDark()).then(scheduleRebuild);
     });
   });
@@ -527,15 +578,58 @@ export function MarkdownEditor(props: MarkdownEditorProps) {
         />
         {/* 预览区 */}
         <div
-          class="h-full overflow-y-auto"
+          class="relative h-full min-h-0"
           classList={{
             hidden: effectiveMode() === "edit",
             "w-1/2": effectiveMode() === "split",
             "w-full": effectiveMode() === "preview",
           }}
-          ref={previewEl}
         >
-          <div class="prose prose-sm dark:prose-invert max-w-none px-6 py-5" innerHTML={previewHtml()} />
+          <div class="h-full overflow-y-auto" ref={previewEl}>
+            <div class="prose prose-sm dark:prose-invert max-w-none px-6 py-5" innerHTML={previewHtml()} />
+          </div>
+
+          {/* 悬浮目录（TOC）按钮：仅在存在标题时显示 */}
+          <Show when={toc().length > 0}>
+            <div class="absolute right-3 top-3 z-10">
+              <Dropdown
+                align="right"
+                width="240px"
+                class="max-h-[60vh] overflow-y-auto"
+                trigger={(api) => (
+                  <button
+                    type="button"
+                    title="目录"
+                    aria-label="目录"
+                    onClick={api.toggle}
+                    class="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-surface/90 text-muted shadow-card backdrop-blur transition-colors hover:text-fg"
+                    classList={{ "border-brand-500 text-brand-600": api.open }}
+                  >
+                    <ListTree size={16} />
+                  </button>
+                )}
+              >
+                {(close) => (
+                  <For each={toc()}>
+                    {(item) => (
+                      <button
+                        type="button"
+                        title={item.text}
+                        onClick={() => {
+                          scrollToHeading(item.id);
+                          close();
+                        }}
+                        class="block w-full truncate rounded px-2 py-1 text-left text-sm text-muted transition-colors hover:bg-black/5 hover:text-fg dark:hover:bg-white/5"
+                        style={{ "padding-left": `${(item.level - 1) * 0.75 + 0.5}rem` }}
+                      >
+                        {item.text}
+                      </button>
+                    )}
+                  </For>
+                )}
+              </Dropdown>
+            </div>
+          </Show>
         </div>
       </div>
 

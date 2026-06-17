@@ -1,4 +1,4 @@
-import { createSignal, Show } from "solid-js";
+import { createSignal, Show, Switch, Match } from "solid-js";
 import { Upload, BadgeCheck, AlertCircle, Loader2 } from "lucide-solid";
 import { Modal } from "../ui/Modal";
 import { Button } from "../ui/Button";
@@ -7,13 +7,20 @@ import { appState, actions } from "../../state/appStore";
 import { userApi, fileApi } from "../../api/endpoints";
 import { pushToast } from "../../state/toast";
 import { avatarUrl } from "../../lib/url";
+import {
+  autoSaveMs,
+  setAutoSaveMs,
+  AUTOSAVE_DEFAULT_MS,
+  AUTOSAVE_MIN_MS,
+  AUTOSAVE_MAX_MS,
+} from "../../lib/prefs";
 
 interface AccountModalProps {
   open: boolean;
   onClose: () => void;
 }
 
-type Tab = "profile" | "password";
+type Tab = "profile" | "password" | "prefs";
 
 export function AccountModal(props: AccountModalProps) {
   const [tab, setTab] = createSignal<Tab>("profile");
@@ -27,10 +34,18 @@ export function AccountModal(props: AccountModalProps) {
         <TabBtn active={tab() === "password"} onClick={() => setTab("password")}>
           修改密码
         </TabBtn>
+        <TabBtn active={tab() === "prefs"} onClick={() => setTab("prefs")}>
+          偏好
+        </TabBtn>
       </div>
-      <Show when={tab() === "profile"} fallback={<PasswordPane />}>
-        <ProfilePane />
-      </Show>
+      <Switch fallback={<ProfilePane />}>
+        <Match when={tab() === "password"}>
+          <PasswordPane />
+        </Match>
+        <Match when={tab() === "prefs"}>
+          <PreferencesPane />
+        </Match>
+      </Switch>
     </Modal>
   );
 }
@@ -213,6 +228,59 @@ function PasswordPane() {
           </Show>
           修改密码
         </Button>
+      </div>
+    </div>
+  );
+}
+
+function PreferencesPane() {
+  // 以「秒」呈现（内部存毫秒）。输入时只更新本地草稿，失焦/回车提交并夹紧。
+  const toSec = (ms: number) => Math.round((ms / 1000) * 10) / 10;
+  const [secs, setSecs] = createSignal(String(toSec(autoSaveMs())));
+
+  const commit = () => {
+    const n = Number(secs());
+    if (!Number.isFinite(n)) {
+      setSecs(String(toSec(autoSaveMs())));
+      return;
+    }
+    setAutoSaveMs(n * 1000);
+    // 回填夹紧后的实际值
+    setSecs(String(toSec(autoSaveMs())));
+    pushToast("已保存偏好设置", "success");
+  };
+
+  const reset = () => {
+    setAutoSaveMs(AUTOSAVE_DEFAULT_MS);
+    setSecs(String(toSec(autoSaveMs())));
+  };
+
+  return (
+    <div class="space-y-5">
+      <div>
+        <label class="mb-1.5 block text-sm font-medium text-fg">自动保存间隔（秒）</label>
+        <div class="flex items-center gap-2">
+          <input
+            class="input w-32"
+            type="number"
+            min={AUTOSAVE_MIN_MS / 1000}
+            max={AUTOSAVE_MAX_MS / 1000}
+            step="0.5"
+            value={secs()}
+            onInput={(e) => setSecs(e.currentTarget.value)}
+            onChange={commit}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") (e.currentTarget as HTMLInputElement).blur();
+            }}
+          />
+          <Button variant="outline" size="sm" onClick={reset}>
+            恢复默认
+          </Button>
+        </div>
+        <p class="mt-1.5 text-xs text-subtle">
+          编辑笔记停止输入后，间隔多久自动保存一次。范围 {AUTOSAVE_MIN_MS / 1000}–{AUTOSAVE_MAX_MS / 1000} 秒，
+          默认 {toSec(AUTOSAVE_DEFAULT_MS)} 秒。切换笔记时仍会立即保存。
+        </p>
       </div>
     </div>
   );

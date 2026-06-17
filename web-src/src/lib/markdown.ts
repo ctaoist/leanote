@@ -41,6 +41,54 @@ export const md: MarkdownIt = new MarkdownIt({
 
 md.use(markdownItKatex, { throwOnError: false });
 
+// ----- GFM 任务列表（`- [ ]` / `- [x]`）-----
+// markdown-it 原生不支持，会把 `[ ]` 当普通文本。这里加一条 core 规则把它转成
+// 禁用态 checkbox（预览只读，不回写源码，与 GitHub 渲染一致），并给 <li>/<ul>
+// 打上 task-list-item / contains-task-list 类，便于 CSS 去掉项目符号、对齐复选框。
+const TASK_RE = /^\[([ xX])\] /;
+md.core.ruler.after("inline", "task-lists", (state) => {
+  const tokens = state.tokens;
+  for (let i = 2; i < tokens.length; i++) {
+    const inline = tokens[i];
+    if (
+      inline.type !== "inline" ||
+      tokens[i - 1].type !== "paragraph_open" ||
+      tokens[i - 2].type !== "list_item_open"
+    )
+      continue;
+    const m = TASK_RE.exec(inline.content);
+    if (!m) continue;
+    const checked = m[1] !== " ";
+
+    // 在 inline 子节点最前插入 checkbox，并把首个文本子节点与 content 去掉标记。
+    const box = new state.Token("html_inline", "", 0);
+    box.content =
+      `<input class="task-list-item-checkbox" type="checkbox" disabled` +
+      (checked ? " checked" : "") +
+      ">";
+    inline.children = inline.children ?? [];
+    inline.children.unshift(box);
+    if (inline.children[1]) inline.children[1].content = inline.children[1].content.replace(TASK_RE, "");
+    inline.content = inline.content.replace(TASK_RE, "");
+
+    // <li> 加 task-list-item；其父 <ul>/<ol> 加 contains-task-list（去重）。
+    tokens[i - 2].attrJoin("class", "task-list-item");
+    const parent = parentListOpen(tokens, i - 2);
+    if (parent && !(parent.attrGet("class") || "").split(/\s+/).includes("contains-task-list"))
+      parent.attrJoin("class", "contains-task-list");
+  }
+});
+
+// 从 list_item_open 向上找包裹它的 bullet_list_open / ordered_list_open。
+function parentListOpen(tokens: MdToken[], itemOpenIdx: number): MdToken | null {
+  const target = tokens[itemOpenIdx].level - 1;
+  for (let i = itemOpenIdx - 1; i >= 0; i--) {
+    const t = tokens[i];
+    if (t.level === target && (t.type === "bullet_list_open" || t.type === "ordered_list_open")) return t;
+  }
+  return null;
+}
+
 // ----- 块级 data-line 注入（源行，0 基，来自 token.map）-----
 type MdToken = Parameters<typeof md.renderer.renderToken>[0][number];
 function tagLine(token: MdToken) {

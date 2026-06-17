@@ -209,6 +209,62 @@ body {
   content: none;
 }
 
+/* ============ 任务列表 / 复选框 ============ */
+/* 任务列表去掉项目符号、左缩进收紧，使复选框对齐文本左缘。 */
+.prose ul.contains-task-list,
+.prose ol.contains-task-list {
+  list-style: none;
+  padding-left: 0.25rem;
+}
+.prose li.task-list-item {
+  list-style: none;
+  padding-left: 0;
+}
+.prose li.task-list-item::marker {
+  content: "";
+}
+/* 自绘复选框（不依赖 @tailwindcss/forms 的内部样式；同时覆盖正文里的裸 <input>）。 */
+.prose input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  flex-shrink: 0;
+  position: relative;
+  width: 1.05em;
+  height: 1.05em;
+  margin: 0 0.5em 0 0;
+  vertical-align: -0.18em;
+  border: 1.5px solid rgb(var(--c-subtle));
+  border-radius: 0.3em;
+  background-color: rgb(var(--c-surface));
+  background-image: none;
+  cursor: pointer;
+  transition: background-color 0.12s ease, border-color 0.12s ease;
+}
+.prose input[type="checkbox"]:disabled {
+  cursor: default;
+}
+.prose input[type="checkbox"]:checked {
+  background-color: rgb(var(--c-accent));
+  background-image: none;
+  border-color: rgb(var(--c-accent));
+}
+.prose input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  left: 0.34em;
+  top: 0.13em;
+  width: 0.26em;
+  height: 0.52em;
+  border: solid rgb(var(--c-accent-fg));
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+.prose input[type="checkbox"]:focus-visible {
+  outline: 2px solid rgb(var(--c-accent) / 0.5);
+  outline-offset: 1px;
+}
+
 /* ============ Prism 代码高亮主题（明/暗）============ */
 .prose .token.comment,
 .prose .token.prolog,
