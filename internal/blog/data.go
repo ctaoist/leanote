@@ -192,7 +192,11 @@ func (r *Renderer) RecentPosts(ctx context.Context, uid oid.OID, n int) []*Post 
 	return posts
 }
 
-// SearchBlogs matches a keyword against post titles (case-insensitive).
+// SearchBlogs matches a keyword against a post's Title, Desc, and full Content
+// (case-insensitive), mirroring leanote's BlogService.SearchBlog (Title/Desc
+// $or, supplemented by note_contents.Content) and our own handler.SearchNote.
+// The Title/Desc/Content matches are unioned into one $or so paging and counts
+// stay accurate over the whole match set.
 func (r *Renderer) SearchBlogs(ctx context.Context, uid oid.OID, key string, page, pageSize int, sortField string, isAsc bool) (types.Page, []*Post) {
 	if page < 1 {
 		page = 1
@@ -203,13 +207,45 @@ func (r *Renderer) SearchBlogs(ctx context.Context, uid oid.OID, key string, pag
 	sortField = safeSortField(sortField)
 	filter := blogFilter(uid)
 	if key != "" {
-		filter["Title"] = bson.M{"$regex": regexEscape(key), "$options": "i"}
+		rx := bson.M{"$regex": regexEscape(key), "$options": "i"}
+		or := []bson.M{{"Title": rx}, {"Desc": rx}}
+		// Also match notes whose full content contains the keyword. The outer
+		// blogFilter (UserId+IsBlog+not-trash) AND's with this $or, so content
+		// hits are still scoped to the user's blog — no IsBlog needed on the
+		// note_contents query (same as handler.SearchNote).
+		if ids := r.contentMatchIDs(ctx, uid, key); len(ids) > 0 {
+			or = append(or, bson.M{"_id": bson.M{"$in": ids}})
+		}
+		filter["$or"] = or
 	}
 	count, _ := r.DB.Notes.CountDocuments(ctx, filter)
 	opt := options.Find().SetSort(bson.D{{Key: sortField, Value: sortDir(isAsc)}}).
 		SetSkip(int64((page - 1) * pageSize)).SetLimit(int64(pageSize))
 	posts := r.notesToPosts(ctx, r.findNotes(ctx, filter, opt), false)
 	return types.NewPage(page, pageSize, int(count), posts), posts
+}
+
+// contentMatchIDs returns note ids whose full content matches key
+// (case-insensitive), capped at 500 as a safety bound (mirrors
+// handler.SearchNote). Blog scoping is applied by the caller's outer filter.
+func (r *Renderer) contentMatchIDs(ctx context.Context, uid oid.OID, key string) []oid.OID {
+	rx := bson.M{"$regex": regexEscape(key), "$options": "i"}
+	cur, err := r.DB.NoteContents.Find(ctx,
+		bson.M{"UserId": uid, "Content": rx},
+		options.Find().SetProjection(bson.M{"_id": 1}).SetLimit(500))
+	if err != nil {
+		return nil
+	}
+	defer cur.Close(ctx)
+	var rows []struct {
+		ID oid.OID `bson:"_id"`
+	}
+	_ = cur.All(ctx, &rows)
+	ids := make([]oid.OID, 0, len(rows))
+	for _, row := range rows {
+		ids = append(ids, row.ID)
+	}
+	return ids
 }
 
 // SearchByTag lists every blog post carrying tag.
