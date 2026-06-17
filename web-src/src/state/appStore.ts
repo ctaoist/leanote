@@ -155,6 +155,27 @@ function handleError(err: unknown, fallback: string) {
   pushToast(msg || fallback, "error");
 }
 
+// 调整某笔记本及其所有祖先的 NumberNotes。笔记数为子树聚合（own + 全后代），
+// 故移动/增删笔记时需沿 ParentNotebookId 上溯同步整条链（delta 取 +1/-1）。
+// 移动时对源链 -1、目的链 +1，公共祖先净抵为 0，各种父子关系皆正确。
+function bumpNotebookCount(notebookId: string | undefined, delta: number) {
+  if (!notebookId || !delta) return;
+  const byId = new Map(state.notebooks.map((n) => [n.NotebookId, n]));
+  const seen = new Set<string>();
+  let id: string | undefined = notebookId;
+  while (id && !seen.has(id)) {
+    const cur: string = id;
+    seen.add(cur);
+    setState(
+      "notebooks",
+      (n) => n.NotebookId === cur,
+      "NumberNotes",
+      (c) => Math.max(0, (c ?? 0) + delta)
+    );
+    id = byId.get(cur)?.ParentNotebookId || undefined;
+  }
+}
+
 // 从当前列表移除一条笔记并选中相邻一条（删除/恢复/彻底删除共用）。
 async function dropNoteFromList(noteId: string) {
   const idx = state.notes.findIndex((n) => n.NoteId === noteId);
@@ -303,6 +324,7 @@ export const actions = {
       });
       if (note && note.NoteId) {
         setState("notes", (prev) => [note, ...prev]);
+        bumpNotebookCount(notebookId, +1);
         setState("currentNoteId", note.NoteId);
         setState("currentNote", { ...note, Content: "" } as NoteAndContent);
         setState("editing", true);
@@ -353,10 +375,12 @@ export const actions = {
   },
 
   async deleteNote(noteId: string) {
+    const srcNotebookId = state.notes.find((n) => n.NoteId === noteId)?.NotebookId;
     try {
       await noteApi.delete([noteId]);
       const idx = state.notes.findIndex((n) => n.NoteId === noteId);
       setState("notes", (prev) => prev.filter((n) => n.NoteId !== noteId));
+      bumpNotebookCount(srcNotebookId, -1);
       if (state.currentNoteId === noteId) {
         const next = state.notes[idx] ?? state.notes[idx - 1];
         if (next) await actions.selectNote(next.NoteId);
@@ -373,9 +397,12 @@ export const actions = {
 
   // 废纸篓：恢复 / 彻底删除
   async restoreNote(noteId: string) {
+    const dstNotebookId = state.notes.find((n) => n.NoteId === noteId)?.NotebookId;
     try {
       await noteApi.restore([noteId]);
       await dropNoteFromList(noteId);
+      // 恢复出废纸篓后重新计入其笔记本（彻底删除则无需，本就不计入）
+      bumpNotebookCount(dstNotebookId, +1);
       pushToast("已恢复", "success");
     } catch (err) {
       handleError(err, "恢复失败");
@@ -393,11 +420,16 @@ export const actions = {
 
   async moveNote(noteId: string, notebookId: string) {
     if (notebookId === state.currentNotebookId) return;
+    // 源笔记本以笔记自身的 NotebookId 为准（搜索/跨本场景比 currentNotebookId 可靠）
+    const srcNotebookId = state.notes.find((n) => n.NoteId === noteId)?.NotebookId;
     try {
       await noteApi.move([noteId], notebookId);
       // 从当前列表移除（已移动到别的笔记本）
       const idx = state.notes.findIndex((n) => n.NoteId === noteId);
       setState("notes", (prev) => prev.filter((n) => n.NoteId !== noteId));
+      // 同步源/目的笔记本（及各自祖先）的笔记数
+      bumpNotebookCount(srcNotebookId, -1);
+      bumpNotebookCount(notebookId, +1);
       if (state.currentNoteId === noteId) {
         const next = state.notes[idx] ?? state.notes[idx - 1];
         if (next) await actions.selectNote(next.NoteId);
@@ -417,6 +449,7 @@ export const actions = {
     // 复制目标必为其它笔记本（菜单已禁用当前笔记本），故不改动当前列表
     try {
       await noteApi.copy([noteId], notebookId);
+      bumpNotebookCount(notebookId, +1);
       pushToast("已复制笔记", "success");
     } catch (err) {
       handleError(err, "复制失败");
